@@ -1,0 +1,35 @@
+conda activate venv_mpvis_flask
+C:\ProgramData\Anaconda3\Scripts\activate venv_mpvis_flask
+
+
+conda create -n venv_mpvis_flask python=3.9
+
+
+pip install python-dotenv
+
+python3.9 -m venv .venv_mpvis
+source .venv_mpvis/bin/activate
+
+5432
+
+run pip install -r requirements.txt to install required modules
+run python manage.py db init  to setup alembic migrations
+run python manage.py db migrate -m='<your migration message>' to create migration files
+then run python manage.py db upgrade to create tables
+
+gunicorn main:app --reload
+gunicorn -127.0.0.1:port main:app --reload
+
+src/api/resources --- flask-restful resources for your project
+src/models --- SQLAlchemy models and schema
+src/routes/api --- contains all your route definition
+src/utils --- contains validations, security and helper files
+src/middlewares --- define your middleware files here
+You can modify the app to suit your need.
+Happy usage.
+
+
+"postgres://postgres:Tope@3236@localhost:5432"
+
+format for you
+npx prettier --write "src/pages/**/*.vue"
