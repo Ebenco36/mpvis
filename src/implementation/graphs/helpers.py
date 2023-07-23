@@ -261,7 +261,9 @@ class Graph:
     def return_obj(self):
         return self.altair_obj
     
-
+    def return_dict_obj(self):
+        return self.altair_obj.to_dict()
+    
     def show(self):
         return self.altair_obj.show()
     

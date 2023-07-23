@@ -1,4 +1,3 @@
-/* eslint-disable */
 <template>
   <div>
     <WidgetsStatsA />
@@ -32,6 +31,12 @@
               <MainChartExample
                 style="height: 300px; max-height: 300px; margin-top: 40px"
               />
+            </CRow>
+            <CRow>
+              <div>
+                <h1>Welcomeee</h1>
+                <div ref="chartContainer"></div>
+              </div>
             </CRow>
           </CCardBody>
           <CCardFooter>
@@ -279,6 +284,7 @@ import avatar6 from '@/pages/assets/images/avatars/6.jpg'
 import MainChartExample from '../charts/MainChartExample'
 import WidgetsStatsA from '../widgets/WidgetsStatsTypeA.vue'
 import WidgetsStatsD from '../widgets/WidgetsStatsTypeD.vue'
+import vegaEmbed from 'vega-embed'
 
 export default {
   name: 'Dashboard',
@@ -409,6 +415,20 @@ export default {
       progressGroupExample2,
       progressGroupExample3,
     }
+  },
+  mounted() {
+    this.fetchChartData()
+  },
+  methods: {
+    async fetchChartData() {
+      console.log('Welcome')
+      // Make a request to your backend API to fetch the chart data
+      const response = await fetch('/api/v1/get_chart_data')
+      const chartData = await response.json()
+      console.log(chartData)
+      // Render the chart using Vega-Embed
+      vegaEmbed(this.$refs.chartContainer, chartData)
+    },
   },
 }
 </script>

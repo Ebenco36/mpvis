@@ -9,6 +9,7 @@ import json
 import ast
 import os
 import datetime
+from flask import send_from_directory
 from src.implementation.data.columns.quantitative.quantitative import cell_columns, rcsb_entries
 from src.implementation.data.columns.quantitative.quantitative_array import quantitative_array_column
 from src.implementation.data.columns.norminal import all_descriptors
@@ -29,10 +30,12 @@ class DataImport:
         check_quant_file = does_file_exist("Quantitative_data.csv")
         if(not check_quant_file):
             current_date = datetime.date.today().strftime('%Y-%m-%d')
-            csv_file_path = 'enriched_db.csv'
-            disp = os.path.join('../public/data_upload', '/enriched_db.csv')
-            print(disp)
-            data = pd.read_csv("./enriched_db.csv", low_memory=False)
+            # root_dir = os.path.abspath('dist')
+            # disp = send_from_directory(os.path.join(root_dir, 'data_folder'), 'enriched_db.csv')
+            # print(disp)
+            directory = os.path.join(os.getcwd(), 'dist', 'data_folder')
+            file_path = os.path.join(directory, 'enriched_db.csv')
+            data = pd.read_csv(file_path, low_memory=False)
 
             # data vis
             print("Number of total Pdb Entries:", len(set(data["Pdb Code"])))
@@ -60,14 +63,15 @@ class DataImport:
                     normalized_data.append(normalized_col)
 
             # Merge the normalized data with the original DataFrame
-            merged_df = pd.concat([data] + normalized_data, axis=1)
+            merged_df_ = pd.concat([data] + normalized_data, axis=1)
 
 
-            merged_df.index = merged_df[['Pdb Code']]
+            merged_df_.index = merged_df_[['Pdb Code']]
             # extract bibiography column
+            merged_df = merged_df_.copy()
             merged_df['bibliography_year'] = merged_df['Bibliography'].apply(extract_year)
             # Replace dots with underscores in column names
-            merged_df.columns = merged_df.columns.str.replace('.', '_', regex=True)
+            merged_df.columns = merged_df.columns.str.replace('.', '_')
             merged_df.to_csv('Quantitative_data.csv')
         else:
             merged_df = pd.read_csv("Quantitative_data.csv", low_memory=False)
