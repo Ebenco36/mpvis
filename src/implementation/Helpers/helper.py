@@ -375,3 +375,7 @@ def remove_html_tags(text):
     except (Exception, TypeError) as e:
         print(text)
         print(str(e))
+
+
+def remove_underscore_change_toupper(original_string):
+    return original_string.replace("_", " ").upper()

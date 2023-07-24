@@ -1,4 +1,5 @@
 import altair as alt
+from src.implementation.Helpers.helper import remove_underscore_change_toupper
 from src.implementation.exceptions.AxisExceptions import AxisException
 from src.implementation.exceptions.NotFoundOnList import NotFoundOnList
 from src.implementation.exceptions.TagDoesnotExist import TagDoesnotExist
@@ -35,11 +36,15 @@ class Graph:
         
         return self
 
-    def encoding_tags(self, encoding_tags:list=[]):
+    def encoding_tags(self, encoding_tags:list=[], tooltips:list = []):
         if (len(self.axis) == len(encoding_tags) or len(encoding_tags) == 0):
             """
                 This implementation can still be optimized.
             """
+            # Title label
+            title_x = remove_underscore_change_toupper(tooltips[0])
+            title_y = remove_underscore_change_toupper(tooltips[1])
+
             # check with default tags if exist
             if(len(encoding_tags) > 0):
                 x_tag, y_tag = encoding_tags
@@ -47,15 +52,15 @@ class Graph:
                 my_y_axis = self.y+":"+str(y_tag[0]).capitalize()
                 
                 if x_tag in self.acceptable_encoding_tags and y_tag in self.acceptable_encoding_tags:
-                    self.encoded_x = alt.X(my_x_axis)
-                    self.encoded_y = alt.Y(my_y_axis)
+                    self.encoded_x = alt.X(my_x_axis, title = title_x)
+                    self.encoded_y = alt.Y(my_y_axis, title = title_y)
                 else:
                     raise TagDoesnotExist("This tag with the name "+x_tag+" or "+y_tag+" does not exist. Acceptable tags includes: "+", ".join(self.acceptable_encoding_tags))
             else:
                 my_x_axis = self.x
                 my_y_axis = self.y
-                self.encoded_x = alt.X(my_x_axis)
-                self.encoded_y = alt.Y(my_y_axis)
+                self.encoded_x = alt.X(my_x_axis, title = title_x)
+                self.encoded_y = alt.Y(my_y_axis, title = title_y)
         else:
             raise AxisException("Axis specified is not equal to the selected encoding tags.")
 
@@ -130,7 +135,7 @@ class Graph:
 
         # setting encoding tags
 
-        self.encoding_tags(encoding_tags)
+        self.encoding_tags(encoding_tags, tooltips)
         if (len(self.axis) == 2):
             self.altair_obj = self.altair_obj.encode(
                 self.encoded_x,
@@ -196,9 +201,10 @@ class Graph:
 
         return self
     
-    def properties(self, width=200, height = 500):
+    def properties(self, width=200, height = 500, title = ""):
         # Set the width and height of the chart
         self.altair_obj = self.altair_obj.properties(
+            title=title,
             width=width,  # Set the width
             height=height # set the height of the graph
         )

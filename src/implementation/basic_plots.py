@@ -42,10 +42,10 @@ def home_page_graph():
             encoding_tags = ["ordinal", "quantitative"]
         )\
         .config()\
-        .properties(width=1000)\
+        .properties(width=1000, title="Yearly Releases")\
         .interactive()
         # Display the chart in Streamlit
-    st.altair_chart(altair_graph_home_.return_obj(), use_container_width=True)
+    return altair_graph_home_.return_dict_obj()
 
 
 def create_UI_grouped_by():

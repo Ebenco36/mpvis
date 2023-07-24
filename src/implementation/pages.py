@@ -96,37 +96,28 @@ class Pages:
         return merged_df, group_by_column
         
 
-    # def view_dashboard(self):
-    #     # Get the URL parameters using Streamlit routing
-    #     app_params = st.experimental_get_query_params()
-    #     selected_content = app_params["key"][0]
+    def view_dashboard(self, get_query_params):
+        # Get the URL parameters using Streamlit routing
+        selected_content = get_query_params
 
-    #     range_resolution_meters = columns_range_limit.get(selected_content) if columns_range_limit.get(selected_content) else 0.2
+        range_resolution_meters = columns_range_limit.get(selected_content) if columns_range_limit.get(selected_content) else 0.2
+        df_, pivot_col_ = self.dashboard_helper_exemption(selected_content, "range_values", range_resolution_meters)
 
-        
-    #     df_, pivot_col_ = self.dashboard_helper_exemption(selected_content, "range_values", range_resolution_meters)
+        return Graph.plot_bar_chat(df_, pivot_col_).to_dict()
 
-    #     # graph = Graph(df_)
-        
-    #     # st.altair_chart(graph.set_properties([pivot_col_, "Values"]).bar_plot().encoding([pivot_col_, "Values"], ['ordinal', 'quantitative']).return_obj())
-    #     st.altair_chart(Graph.plot_bar_chat(df_, pivot_col_))
+    def EDA_view(self, selected_chunk_perc=10, selected_columns_to_vis:list=[]):
+        perc = [i for i in range(10, 101, 10)]
+        # Create a sidebar with page selection dropdown
+        data = self.remove_emptiness_with_percentage(selected_chunk_perc)
+        self.chunked_data = data
+        # Create a sidebar with page selection dropdown
+        selected_columns_to_vis = st.sidebar.multiselect("Select Columns", data.columns.tolist())
+        if(selected_columns_to_vis):
+            # set globally
+            self.selected_columns_to_vis = selected_columns_to_vis
+            self.chunked_data = data[selected_columns_to_vis]
 
-    # def EDA_view(self):
-    #     perc = [i for i in range(10, 101, 10)]
-    #     # Create a sidebar with page selection dropdown
-    #     selected_chunk_perc = st.sidebar.selectbox("Select Percentage to Chunk", perc)
-    #     data = self.remove_emptiness_with_percentage(selected_chunk_perc)
-    #     self.chunked_data = data
-    #     # Create a sidebar with page selection dropdown
-    #     selected_columns_to_vis = st.sidebar.multiselect("Select Columns", data.columns.tolist())
-    #     if(selected_columns_to_vis):
-    #         # set globally
-    #         self.selected_columns_to_vis = selected_columns_to_vis
-    #         self.chunked_data = data[selected_columns_to_vis]
-
-    #     st.write(self.EDA_data_summary())
-    #     st.altair_chart(self.EDA_correlation_matrix_plot())
-    #     st.altair_chart(self.EDA_outlier_plot())
+        return self.EDA_data_summary(), self.EDA_correlation_matrix_plot(), self.EDA_outlier_plot()
 
 
 
