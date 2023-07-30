@@ -12,6 +12,7 @@
               </CCol>
             </CRow>
             <CRow>
+              <FilterComponentVue />
               <div ref="chartContainer"></div>
             </CRow>
           </CCardBody>
@@ -94,16 +95,19 @@
 <script>
 import WidgetsStatsA from '../widgets/WidgetsStatsTypeA.vue'
 import vegaEmbed from 'vega-embed'
+import FilterComponentVue from '../../components/FilterComponent.vue'
 
 export default {
   name: 'Dashboard',
   components: {
     WidgetsStatsA,
+    FilterComponentVue,
   },
   data: function () {
     return {
       rows: 0,
       columns: 0,
+      graph_list: null,
     }
   },
   mounted() {
@@ -124,11 +128,17 @@ export default {
 
       //   vegaEmbed(this.$refs.groupChartContainer, data.group_graph)
       // Embed each graph in the list
-      data.group_graph_array.forEach(this.embedGraph)
+      this.graph_list = data.group_graph_array
+      this.graph_list.forEach((item, index) => {
+        console.log(index)
+        this.embedGraph(item)
+      })
     },
     // Function to embed each graph using vegaEmbed
     embedGraph(graphSpec) {
-      vegaEmbed(this.$refs.groupChartContainer, graphSpec, { actions: false })
+      vegaEmbed(this.$refs['groupChartContainer'], graphSpec, {
+        actions: false,
+      })
     },
   },
 }

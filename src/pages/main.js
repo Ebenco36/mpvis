@@ -8,6 +8,8 @@ import CoreuiVue from '@coreui/vue';
 import CIcon from '@coreui/icons-vue';
 import { iconsSet as icons } from '@/pages/assets/icons';
 import DocsExample from '@/pages/components/DocsExample.vue';
+import '@coreui/coreui/dist/css/coreui.min.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 const app = createApp(App)
 app.use(store)
