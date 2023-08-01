@@ -33,3 +33,26 @@ Happy usage.
 
 format for you
 npx prettier --write "src/pages/**/*.vue"
+
+pip install pyjwt pillow
+
+python manage.py db migrate
+
+push updates
+python manage.py db upgrade
+
+brew services start redis
+
+brew services info redis
+
+brew services stop redis
+
+Connect to Redis
+Once Redis is running, you can test it by running redis-cli:
+
+redis-cli
+
+
+python -m celery -A main  worker
+celery -A main worker
+celery -A mpvis_app.celery worker

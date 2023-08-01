@@ -13,6 +13,7 @@ JWT_SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DATA_FOLDER=os.path.join('public', 'DATA_UPLOAD')
 
+
 APP_DIR = os.path.dirname(__file__)
 print(APP_DIR)
 ROOT_DIR = os.path.dirname(APP_DIR)

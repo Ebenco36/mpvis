@@ -1,4 +1,4 @@
-from src.models.user import UserModel
+from src.User.model import UserModel
 
 
 def authenticate(email, password):
