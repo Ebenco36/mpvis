@@ -21,7 +21,7 @@ from src.implementation.Helpers.fields_helper import graph_options, graph_types_
 data_import = DataImport()
 df = data_import.loadFile()
 
-def home_page_graph():
+def home_page_graph(conf):
     group_aggregate_selected_key = 'count'
     statistics_view = GroupBy(df)
     quantitative_data = cell_columns+rcsb_entries+quantitative_array_column
@@ -41,8 +41,8 @@ def home_page_graph():
             ], 
             encoding_tags = ["ordinal", "quantitative"]
         )\
-        .config()\
-        .properties(width=1000, title="Yearly Releases")\
+        .config(conf=conf)\
+        .properties(width=500, title="Yearly Releases")\
         .interactive()
         # Display the chart in Streamlit
     return altair_graph_home_.return_dict_obj()

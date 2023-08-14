@@ -1,6 +1,5 @@
 import os
-from flask import Flask, Blueprint, current_app, send_file, request, jsonify
-from flask_restful import Api
+from flask import Flask
 from flask_jwt import JWT
 from SchedulerConfig import SConfig
 from src.utils.security import authenticate, identity
@@ -8,12 +7,12 @@ from src.models.basemodel import db
 from flask_mail import Mail
 from celery import Celery
 from src.middlewares.auth_middleware import token_required
-from src.User.routes import create_authentication_routes
 from flask_apscheduler import APScheduler
 from src.Jobs.MPStructJobs import MPSTRUCT
 from src.Jobs.PDBJobs import PDBJOBS
 from apscheduler.triggers.cron import CronTrigger
 from flask_cors import CORS
+from src import RouteInitialization
 
 mail = Mail()
 def initdb(flask_app):
@@ -24,8 +23,6 @@ def initdb(flask_app):
 
     
 def create_app():
-    from src.Admin.routes import admin_routes
-    from src.Dashboard.routes import routes
     flask_app = Flask(__name__, static_folder="./dist/static")
     flask_app.config.from_object(SConfig())
     scheduler = APScheduler()
@@ -89,24 +86,11 @@ def create_app():
     mail = Mail(flask_app)
     flask_app.config.from_pyfile('config.py')
 
-    auth = Blueprint('auth', __name__, static_url_path="assets")
-
-    bp = Blueprint('api', __name__, static_url_path="assets")
-
-    admin_bp = Blueprint('admin', __name__, static_url_path="assets")
-
-    auth_api = Api(auth)
-    api = Api(bp)
-    admin = Api(admin_bp)
-    create_authentication_routes(auth_api)
-    routes(api)
-    admin_routes(admin)
-
-    flask_app.register_blueprint(auth)
-
-    flask_app.register_blueprint(bp, url_prefix="/api/v1")
-
-    flask_app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
+    """
+        Route Implementation. Well structured
+    """
+    init_route = RouteInitialization()
+    init_route.init_app(flask_app)
 
     JWT(flask_app, authenticate, identity)  # /auth
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'this is a secret'
@@ -116,11 +100,11 @@ def create_app():
     def index():
         return 'Welcome to Flask Rest API Setup!'
     
-    @flask_app.route('/dashboard')
-    def index_client():
-        dist_dir = current_app.config['DIST_DIR']
-        entry = os.path.join(dist_dir, 'index.html')
-        return send_file(entry)
+    # @flask_app.route('/dashboard')
+    # def index_client():
+    #     dist_dir = current_app.config['DIST_DIR']
+    #     entry = os.path.join(dist_dir, 'index.html')
+    #     return send_file(entry)
 
     @flask_app.route("/hello")
     def hello():
@@ -129,7 +113,7 @@ def create_app():
     # Initialize CORS with default options (allow all origins)
     CORS(flask_app)
 
-    initdb(flask_app)
+    # initdb(flask_app)
 
     return flask_app
 

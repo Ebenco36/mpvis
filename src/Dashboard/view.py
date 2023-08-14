@@ -3,12 +3,10 @@ from werkzeug.security import safe_str_cmp
 from src.implementation.pages import Pages
 from src.User.model import UserModel
 from src.models.schemas.user import UserSchema, user_summary
-import pandas as pd
-import altair as alt
-import random
 import json
 from flask import jsonify, request
-from src.implementation.Helpers.helper import extract_function_names
+from src.implementation.Helpers.helper import summaryStatisticsConverter
+from src.Dashboard.data import stats_data
 from src.implementation.graphs.helpers import Graph
 from src.implementation.visualization import DataImport
 from src.implementation.Helpers.machine_learning_al.sklearnML import MachineLearning
@@ -35,11 +33,13 @@ class Dashboard(Resource):
         self.parser.add_argument('param', type=str, help='Sample parameter')
 
     # @staticmethod
-    @token_required
+    # @token_required
     def get(self):
         args = self.parser.parse_args()
         # Get the pagination parameters from the query string
         page = int(request.args.get('page', 1))
+        conf = request.args.get('chart_conf', '{"color": "#a855f7", "opacity": 0.9}')
+        conf = json.loads(conf)
         records_per_page = int(request.args.get('records_per_page', 10))
 
         # Calculate the start and end index for slicing the DataFrame
@@ -52,9 +52,9 @@ class Dashboard(Resource):
         df_summary = self.dataset.describe(include='all').fillna("").to_dict()
         # Combine the paginated data and the summary statistics into a single dictionary
         rows, columns = self.dataset.shape
-        trend = home_page_graph()
+        trend = home_page_graph(conf)
         default_display = [
-            'Species', 'Taxonomic Domain', 'Resolution', 'citation_country', 'citation_year'
+            "Group", 'Taxonomic Domain', 'citation_country', 'citation_year'
         ]
         request_for_group = request.args.get('group_key', 'Taxonomic Domain')
         # Split the string on commas to create a list
@@ -68,10 +68,17 @@ class Dashboard(Resource):
 
         group_graph_array = []
 
-        for graph in unique_group_list:
-            group_graph = self.pages.view_dashboard(graph)
-            group_graph_array.append(group_graph)
-
+        for (key, graph) in enumerate(unique_group_list):
+            group_graph = self.pages.view_dashboard(graph, conf)
+            obj = {
+                "chart_obj": group_graph,
+                "id": "graph" + str(key),
+                "name": "graph " + str(key),
+                "groups": key,
+            }
+            group_graph_array.append(obj)
+        # Sorting the list based group size
+        group_graph = sorted(group_graph.values(), key=lambda obj: len(obj))
         result = {
             'rows': rows,
             'columns': columns,
@@ -92,16 +99,91 @@ class Dashboard(Resource):
         }, 201
 
 
-class SampleChart(Resource):
-    @token_required
+class SummaryStatistics(Resource):
+
+    def __init__(self):
+        data_import = DataImport()
+        self.dataset = data_import.loadFile()
+        self.pages = Pages(self.dataset)
+
+    # @token_required
     def get(self):
-        source = data.cars()
+        check_which_page = request.args.get('stats-data', 'no_where')
 
-        chart = alt.Chart(source).mark_point().encode(
-            x='Horsepower',
-            y='Miles_per_Gallon',
-            color='Origin',
-        )
+        group_field_selection = request.args.get('field_selection', 'Species')
 
-        chart_data = chart.to_dict()
-        return chart_data
+        parent_data, summary_search_filter_options, group_field_selection = summaryStatisticsConverter(group_field_selection)
+        if (check_which_page == "stats-categories"):
+            data = parent_data
+        else:
+            conf = request.args.get('chart_conf', '{"color": "#a855f7", "opacity": 0.9}')
+            conf = json.loads(conf)
+            group_graph = self.pages.view_dashboard(group_field_selection, conf)
+            merged_list = summary_search_filter_options
+            data = {
+                "search_object" : merged_list,
+                "data"          : group_graph,
+                "search_key"    : group_field_selection,
+                "status"        : 'success',
+            }
+        return jsonify(data)
+
+
+
+class UseCases(Resource):
+    def __init__(self):
+        pass
+
+    def get(self):
+        cases = [
+            {"value": "case_1", "name": "case 1", "desc": """
+                Use Case 1: K-Means Clustering for Structural Similarity Analysis
+                Objective: Perform clustering on enriched Mpstruct and PDB data to identify structurally similar protein conformations.
+                <div>   
+                    Steps:
+                    <ul>
+                        <li>Data Collection: Retrieve protein structural data from Mpstruct and PDB databases, including attributes like secondary structure elements, ligand binding sites, and torsion angles.</li>
+                        <li>Feature Engineering: Preprocess and transform the data to create relevant features for clustering, such as combining torsion angles and secondary structure information.</li>
+                        <li>K-Means Clustering: Apply K-Means clustering algorithm to group protein structures based on their structural features. Determine the optimal number of clusters using techniques like the elbow method.</li>
+                        <li>Visualization: Visualize the clusters in a reduced dimension space using techniques like Principal Component Analysis (PCA).</li>
+                        <li>Interpretation: Analyze the clusters to identify proteins with similar structural characteristics, potentially revealing insights into functional relationships.</li>
+                    </ul>
+                </div>
+            """,
+            "target": "Resolution"
+            },
+            {"value": "case_2", "name": "case 2", "desc": """
+                Use Case 2: K-Means Clustering for Structural Similarity Analysis
+                Objective: Perform clustering on enriched Mpstruct and PDB data to identify structurally similar protein conformations.
+                <div>   
+                    Steps:
+                    <ul>
+                        <li>Data Collection: Retrieve protein structural data from Mpstruct and PDB databases, including attributes like secondary structure elements, ligand binding sites, and torsion angles.</li>
+                        <li>Feature Engineering: Preprocess and transform the data to create relevant features for clustering, such as combining torsion angles and secondary structure information.</li>
+                        <li>K-Means Clustering: Apply K-Means clustering algorithm to group protein structures based on their structural features. Determine the optimal number of clusters using techniques like the elbow method.</li>
+                        <li>Visualization: Visualize the clusters in a reduced dimension space using techniques like Principal Component Analysis (PCA).</li>
+                        <li>Interpretation: Analyze the clusters to identify proteins with similar structural characteristics, potentially revealing insights into functional relationships.</li>
+                    </ul>
+                </div>
+            """,
+            "target": "Resolution"
+            },
+            {"value": "case_3", "name": "case 3", "desc": """
+                Use Case 3: K-Means Clustering for Structural Similarity Analysis
+                Objective: Perform clustering on enriched Mpstruct and PDB data to identify structurally similar protein conformations.
+                <div>   
+                    Steps:
+                    <ul>
+                        <li>Data Collection: Retrieve protein structural data from Mpstruct and PDB databases, including attributes like secondary structure elements, ligand binding sites, and torsion angles.</li>
+                        <li>Feature Engineering: Preprocess and transform the data to create relevant features for clustering, such as combining torsion angles and secondary structure information.</li>
+                        <li>K-Means Clustering: Apply K-Means clustering algorithm to group protein structures based on their structural features. Determine the optimal number of clusters using techniques like the elbow method.</li>
+                        <li>Visualization: Visualize the clusters in a reduced dimension space using techniques like Principal Component Analysis (PCA).</li>
+                        <li>Interpretation: Analyze the clusters to identify proteins with similar structural characteristics, potentially revealing insights into functional relationships.</li>
+                    </ul>
+                </div>
+            """,
+            "target": "Resolution"
+            },
+        ]
+
+        return jsonify(cases)

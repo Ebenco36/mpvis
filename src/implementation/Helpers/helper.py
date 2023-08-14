@@ -3,17 +3,22 @@ import ast
 import os
 import re
 import html
+import json
 import math
 import numpy as np
 from bs4 import BeautifulSoup
+from flask import jsonify
 from src.implementation.data.columns.remove_columns import not_needed_columns
 
 def convert_to_type(string_array):
     try:
-        # Convert string array to numeric array
-        value = ast.literal_eval(string_array)
+        if string_array and not pd.isna(string_array):
+            # Convert string array to numeric array
+            value = ast.literal_eval(string_array)
+        else:
+            value = []
     except (Exception, ValueError, TypeError) as ex:
-        value = 0
+        value = []
     return value
     
 
@@ -41,8 +46,9 @@ def extract_function_names(file_path):
         content = file.read()
         function_name_pattern = r'def\s+([\w_]+)\('
         matches = re.findall(function_name_pattern, content)
-        
-        function_names.extend(matches)
+        # Remove __init__ if it exists in the list
+        matches_list = [item for item in matches if item != '__init__']
+        function_names.extend(matches_list)
     
     return function_names
 
@@ -379,3 +385,119 @@ def remove_html_tags(text):
 
 def remove_underscore_change_toupper(original_string):
     return original_string.replace("_", " ").upper()
+
+
+def replace_and_separate(text):
+    # Define the regex patterns for matching the substrings to replace
+    patterns = [
+        r'^pdbx_serial_',
+        r'^pdbx_nmr_'
+        r'^pdbx_database_status_',
+        r'^pdbx_nmr_ensemble_',
+        r'^rcsb_primary_citation_rcsb_',
+        r'^rcsb_primary_citation_rcsb_'
+    ]
+
+    # Replace the substrings with 'pdbx' or 'rcsb'
+    for pattern in patterns:
+        text = re.sub(pattern, 'pdbx_' if pattern.startswith('^pdbx') else 'rcsb_', text)
+
+    return text
+    
+
+def filter_list(item_list, ends_with):
+    result = list(filter(lambda item: item.endswith(ends_with), item_list))
+    return result
+
+def format_string_caps(input_string):
+    # Replace underscores with spaces
+    formatted_string = input_string.replace('_', ' ')
+    
+    # Capitalize the first character
+    formatted_string = formatted_string.capitalize()
+
+    return formatted_string
+
+
+"""
+    Converter for the basic statistics selection
+    This method helps us to match the text selected
+    to the list item or if doesn't exist as text then we 
+    want to assume the key was used.
+"""
+from src.Dashboard.data import stats_data
+def summaryStatisticsConverter(search_key):
+    # get content of data in each object
+    data = []
+    for d in stats_data():
+        data += d['data']
+
+    found_key = ""
+
+    # Check if the name exists directly in the values
+    for entry in data:
+        if search_key == entry['value']:
+            content_value = entry['value']
+            found_key = content_value
+            break
+    else:
+        # If not found, check the name in the name attributes
+        for entry in data:
+            if search_key == entry['name']:
+                content_value = entry['value']
+                found_key = content_value
+                break
+        else:
+            found_key = ""
+
+    return stats_data(), data, found_key
+
+"""
+    return a simple list of summary statistics options rather
+    than complex dataset for filter.
+"""
+
+def summaryStatisticsFilterOptions():
+    merged_list = [data for d in stats_data() for data in d["data"].values()]
+
+    return merged_list
+
+
+def removeUnderscoreIDFromList(_list):
+    cleaned_list = [item[:-3] if item.endswith('_id') else item for item in _list]
+    return cleaned_list
+
+
+def tableHeader(header_list:list = []):
+    list_of_objects = [
+        {'id': i, 'text': format_string_caps(item), 'value': item, "sortable": True} for i, item in enumerate(header_list, start=1)
+    ]
+
+    return list_of_objects
+
+
+
+def create_json_response(httpResponse=False, data=None, status=None, status_code=200, message=None, error_message=None, extras=None):
+    response_data = {'status_code': status_code}
+    
+    if data is not None:
+        response_data['data'] = data
+    if message is not None:
+        response_data['message'] = message
+    if status is not None:
+        response_data['status'] = status
+    if error_message is not None:
+        response_data['error_message'] = error_message
+    if extras is not None:
+        response_data.update(extras)
+    
+    if(httpResponse):
+        response = jsonify(response_data)
+        response.status_code = status_code
+    else:
+        response = response_data
+
+    return response
+
+def convert_json_to_dict(json_response):
+    return json.loads(json_response)

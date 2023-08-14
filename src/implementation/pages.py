@@ -5,8 +5,10 @@ from src.implementation.graphs.helpers import Graph
 from src.implementation.visualization import DataImport
 from src.implementation.Helpers.BasicClasses.GroupByClass import GroupBy
 from src.implementation.data.columns.remove_columns import not_needed_columns
-from src.implementation.Helpers.helper import NAPercent, parser_change_dot_to_underscore, generate_range_bins, generate_list_with_difference, convert_to_numeric_or_str
+from src.implementation.Helpers.helper import NAPercent, parser_change_dot_to_underscore, \
+    generate_range_bins, generate_list_with_difference, convert_to_numeric_or_str, convert_to_type
 from src.implementation.range_order import columns_range_limit
+from src.Dashboard.data import array_string_type
 
 class Pages:
 
@@ -32,6 +34,10 @@ class Pages:
     def dashboard_helper_exemption(self, group_by_column = 'Resolution', range_name="range_value", range_resolution_meters=0.2):
         # Apply the custom function to 'Column1'
         self.data[group_by_column] = self.data[group_by_column].apply(convert_to_numeric_or_str)
+
+        # Convert string list to list
+        self.data['rcsb_entry_info_software_programs_combined'] = self.data['rcsb_entry_info_software_programs_combined'].apply(lambda x: convert_to_type(x))
+
         # Separate string column
         mask_str = self.data[group_by_column].apply(lambda x: isinstance(x, str))
         df_numeric = self.data[~mask_str]
@@ -72,7 +78,11 @@ class Pages:
             # Drop the 'extra if exist' column
             merged_df.drop(group_by_column, axis=1, inplace=True)
             merged_df.columns = [group_by_column, "Values"]
-
+        elif (group_by_column in array_string_type()):
+            # Method 2: Using value_counts
+            all_names = [name for names_list in self.data[group_by_column] for name in names_list]
+            merged_df = pd.Series(all_names).value_counts().reset_index()
+            merged_df.columns = [group_by_column, 'Values']
         else:
             # replace dot with underscore
             quantitative_replace_dot_with_underscore = parser_change_dot_to_underscore(self.data.columns)
@@ -96,14 +106,14 @@ class Pages:
         return merged_df, group_by_column
         
 
-    def view_dashboard(self, get_query_params):
+    def view_dashboard(self, get_query_params, conf={}):
         # Get the URL parameters using Streamlit routing
         selected_content = get_query_params
 
         range_resolution_meters = columns_range_limit.get(selected_content) if columns_range_limit.get(selected_content) else 0.2
         df_, pivot_col_ = self.dashboard_helper_exemption(selected_content, "range_values", range_resolution_meters)
 
-        return Graph.plot_bar_chat(df_, pivot_col_).to_dict()
+        return Graph.plot_bar_chat(df_, pivot_col_, conf).to_dict()
 
     def EDA_view(self, selected_chunk_perc=10, selected_columns_to_vis:list=[]):
         perc = [i for i in range(10, 101, 10)]

@@ -1,5 +1,7 @@
 import altair as alt
-from src.implementation.Helpers.helper import remove_underscore_change_toupper
+import json
+from src.implementation.Helpers.helper import remove_underscore_change_toupper, \
+    format_string_caps
 from src.implementation.exceptions.AxisExceptions import AxisException
 from src.implementation.exceptions.NotFoundOnList import NotFoundOnList
 from src.implementation.exceptions.TagDoesnotExist import TagDoesnotExist
@@ -103,6 +105,12 @@ class Graph:
         self.altair_obj = alt.Chart(self.data).mark_boxplot()
         return self
     
+    def pie_plot(self):
+        self.x, self.y = self.axis
+        self.altair_obj = alt.Chart(self.data).mark_pie()
+        return self
+    
+    
     def violin_plot(self):
         self.x, self.y = self.axis
         self.altair_obj = alt.Chart(self.data).transform_density(
@@ -131,7 +139,7 @@ class Graph:
         color = self.labels+':N' if (len(self.labels) > 0) else alt.Color(scale=alt.Scale(scheme='category20'))
         # set tooltips
 
-        tooltip_list = [alt.Tooltip(tooltip, title=tooltip.capitalize()) for tooltip in tooltips]
+        tooltip_list = [alt.Tooltip(tooltip, title=format_string_caps(tooltip.capitalize())) for tooltip in tooltips]
 
         # setting encoding tags
 
@@ -201,17 +209,17 @@ class Graph:
 
         return self
     
-    def properties(self, width=200, height = 500, title = ""):
+    def properties(self, width=200, height = None, title = ""):
         # Set the width and height of the chart
         self.altair_obj = self.altair_obj.properties(
             title=title,
-            width=width,  # Set the width
-            height=height # set the height of the graph
+            # width=width,  # Set the width
+            # height=height # set the height of the graph
         )
         return self
 
 
-    def config(self, label_font_size=12, title_font_size=14, font_size=16, font_weight='bold'):
+    def config(self, label_font_size=12, title_font_size=14, font_size=16, font_weight='bold', conf='{"color": "#a855f7", "opacity": 0.9}'):
 
         self.altair_obj = self.altair_obj.configure_axis(
             labelFontSize=label_font_size,
@@ -220,6 +228,8 @@ class Graph:
             fontSize=font_size,
             fontWeight=font_weight
         )
+        
+        self.configure_mark(conf["color"], float(conf["opacity"]))
 
         return self
     
@@ -247,6 +257,13 @@ class Graph:
         ).resolve_scale(color='independent')
 
         return combined_chart
+    
+    def configure_mark(self, color='#a855f7', opacity=1):
+        self.altair_obj = self.altair_obj.configure_mark(
+            opacity=opacity,
+            color= color
+        )
+        return self
     
     def legend_config(self):
         # self.altair_obj = self.altair_obj.configure_legend(
@@ -330,9 +347,13 @@ class Graph:
     
 
     @staticmethod
-    def plot_bar_chat(df, x_axis = ""):
+    def plot_bar_chat(df, x_axis = "", conf={}):
         # Create an Altair bar chart with sorting based on 'Value'
         return alt.Chart(df).mark_bar().encode(
             x=alt.X(x_axis+':O'),
-            y='Values'
+            y='Values',
+            tooltip=[alt.Tooltip(tooltip, title=format_string_caps(tooltip.capitalize())) for tooltip in [x_axis, 'Values']]
+        ).configure_mark(
+            opacity= conf["opacity"],
+            color= conf["color"]
         )

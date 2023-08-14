@@ -12,6 +12,11 @@ source .venv_mpvis/bin/activate
 
 5432
 
+Windows
+conda create -n _wvenv_mpvis python=3.9
+conda activate _wvenv_mpvis
+pip install -r /Users/awotoroe/Desktop/mpvis/requirements.txt
+
 run pip install -r requirements.txt to install required modules
 run python manage.py db init  to setup alembic migrations
 run python manage.py db migrate -m='<your migration message>' to create migration files
@@ -19,6 +24,14 @@ then run python manage.py db upgrade to create tables
 
 gunicorn main:app --reload
 gunicorn -127.0.0.1:port main:app --reload
+
+Windows
+.venv_mpvis_\Scripts\activate 
+C:\ProgramData\Anaconda3\Scripts\activate _wvenv_mpvis
+waitress-serve --listen=127.0.0.1:8000 main:app
+pip install hupper
+hupper -m waitress --listen=127.0.0.1:8000 main:app
+
 
 src/api/resources --- flask-restful resources for your project
 src/models --- SQLAlchemy models and schema
@@ -56,3 +69,14 @@ redis-cli
 python -m celery -A main  worker
 celery -A main worker
 celery -A mpvis_app.celery worker
+
+
+mklink "C:\Users\hal\AppData\Local\Continuum\anaconda3\DLLs\libssl-1_1-x64.dll" "C:\Users\hal\AppData\Local\Continuum\anaconda3\Library\bin\libssl-1_1-x64.dll"
+
+mklink "C:\ProgramData\Anaconda3\DLLs\libcrypto-1_1-x64.dll" "C:\ProgramData\Anaconda3\Library\bin\libcrypto-1_1-x64.dll"
+
+pip install bioseq
+pip install biopython
+
+
+curl --data "selected_column=['cell_angle_alpha', 'cell_angle_beta', 'cell_angle_gamma', 'cell_length_a']" http://127.0.0.1:8000/api/v1/UOT?request-type=stage1

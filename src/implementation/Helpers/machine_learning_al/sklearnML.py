@@ -42,7 +42,7 @@ class MachineLearning:
         return self.X, params
 
     # Affinity Propagation
-    def affinity_propagation(self):
+    def affinity_propagation_clustering(self):
         labels, params = self.run_clustering_algorithm(AffinityPropagation, self.X)
         self.X['affinity_propagation'] = labels
         return self.X, params 

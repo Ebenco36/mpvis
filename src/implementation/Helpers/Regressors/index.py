@@ -3,6 +3,7 @@ from sklearn.svm import SVR
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from src.implementation.data.columns.remove_columns import not_needed_columns
+from src.implementation.Helpers.helper import create_json_response, format_string_caps
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
@@ -14,7 +15,7 @@ class Regressors:
 
     def __init__(self, data, remove_by_percent):
         self.data = data
-        self.remove_empty_by(remove_by_percent)
+        self.remove_empty_by_percent_regressor(remove_by_percent)
 
 
     
@@ -22,8 +23,8 @@ class Regressors:
         regressor = algorithm(**kwargs)
         # Create a copy of the dataset to store the imputed values
         imputed_data = self.data.copy()  
-        columns = not_needed_columns
-        imputed_data = imputed_data.drop(columns, inplace=False, axis=1)
+        # columns = not_needed_columns
+        # imputed_data = imputed_data.drop(columns, inplace=False, axis=1)
         imputed_data = imputed_data[imputed_data.select_dtypes(include=['float', 'int', 'float64', 'int64']).columns]
         # remove columns with no value
         imputed_data_all_null = imputed_data.columns[imputed_data.isnull().all()].tolist()
@@ -32,8 +33,17 @@ class Regressors:
         selected_columns = imputed_data.columns.difference(imputed_data_all_null)
 
         imputed_data = imputed_data[selected_columns]
+        if (imputed_data.empty):
+            return create_json_response(
+                httpResponse=False, 
+                data=[], 
+                status=True, 
+                status_code=200, 
+                message="", 
+                error_message="DataFrame is empty"
+            )
         # fill empty for us to train a model that fills in None /NaN spaces
-        imputed_data_ = self.simple_regression(imputed_data, 'mean')
+        imputed_data_ = self.simple_regressor(imputed_data, 'mean')
 
         for target_column in imputed_data_.columns:
             # Split the dataset into two parts: one with complete data for the target column, and one without
@@ -63,13 +73,26 @@ class Regressors:
                     # y_pred = regressor.predict(X_test)
                 except (Exception, ValueError) as e:
                     print("Column with problem: "+target_column)
-                    test_data.to_csv(target_column+".csv")
-                    print(str(e))
-                    exit()
+                    return create_json_response(
+                        httpResponse=False, 
+                        data=[], 
+                        status=False, 
+                        status_code=400, 
+                        message="", 
+                        error_message="Column with problem: "+format_string_caps(target_column)
+                    )
 
                 # Fill in the missing values in the target column
                 # imputed_data.loc[imputed_data[target_column].isnull(), target_column] = y_pred
-        return imputed_data_
+        response = create_json_response(
+            httpResponse=False, 
+            data=imputed_data_, 
+            status=True, 
+            status_code=200, 
+            message="fetch successfully", 
+            error_message=""
+        )
+        return response
 
     # Random Forest
     def random_forest_regressor(self):
@@ -87,11 +110,11 @@ class Regressors:
         return predicted_missing
 
     # OPTICS
-    def linear_regression(self):
+    def linear_regressor(self):
         predicted_missing = self.linear_regression(LinearRegression)
         return predicted_missing
 
-    def simple_regression(self, dataset, strategy = 'mean'):
+    def simple_regressor(self, dataset, strategy = 'mean'):
         # # Initialize the SimpleImputer with desired strategy (e.g., 'mean', 'median', 'most_frequent')
         imputer = SimpleImputer(strategy=strategy, missing_values=np.NaN, keep_empty_features=True)
 
@@ -101,10 +124,9 @@ class Regressors:
         transformed = pd.DataFrame(data_formed)
         # Transform the DataFrame to fill missing values
         df_filled = pd.DataFrame(data_formed, columns=dataset.columns)
-        df_filled.to_csv("wjwjjw.csv")
         return df_filled
     
-    def remove_empty_by(self, remove_by_percent = 90):
+    def remove_empty_by_percent_regressor(self, remove_by_percent = 90):
         # Create a copy of the dataset to store the imputed values
         imputed_data = self.data.copy()  
         # Calculate the percentage of None values in each column
