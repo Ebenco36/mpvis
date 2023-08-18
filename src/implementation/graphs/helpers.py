@@ -350,8 +350,8 @@ class Graph:
     def plot_bar_chat(df, x_axis = "", conf={}):
         # Create an Altair bar chart with sorting based on 'Value'
         return alt.Chart(df).mark_bar().encode(
-            x=alt.X(x_axis+':O'),
-            y='Values',
+            y=alt.X(x_axis+':N', sort="-x"),
+            x=alt.Y('Values:Q'),
             tooltip=[alt.Tooltip(tooltip, title=format_string_caps(tooltip.capitalize())) for tooltip in [x_axis, 'Values']]
         ).configure_mark(
             opacity= conf["opacity"],

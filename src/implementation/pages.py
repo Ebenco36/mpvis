@@ -32,67 +32,79 @@ class Pages:
         return grouped_data, group_by_column
 
     def dashboard_helper_exemption(self, group_by_column = 'Resolution', range_name="range_value", range_resolution_meters=0.2):
-        # Apply the custom function to 'Column1'
-        self.data[group_by_column] = self.data[group_by_column].apply(convert_to_numeric_or_str)
+        if ( not '*' in group_by_column):
+            # Apply the custom function to 'Column1'
+            self.data[group_by_column] = self.data[group_by_column].apply(convert_to_numeric_or_str)
 
-        # Convert string list to list
-        self.data['rcsb_entry_info_software_programs_combined'] = self.data['rcsb_entry_info_software_programs_combined'].apply(lambda x: convert_to_type(x))
+            # Convert string list to list
+            self.data['rcsb_entry_info_software_programs_combined'] = self.data['rcsb_entry_info_software_programs_combined'].apply(lambda x: convert_to_type(x))
 
-        # Separate string column
-        mask_str = self.data[group_by_column].apply(lambda x: isinstance(x, str))
-        df_numeric = self.data[~mask_str]
-        df_str = self.data[mask_str]
+            # Separate string column
+            mask_str = self.data[group_by_column].apply(lambda x: isinstance(x, str))
+            df_numeric = self.data[~mask_str]
+            df_str = self.data[mask_str]
+            max_value = df_numeric[group_by_column].max(skipna=True)
+            if(not df_numeric.empty and not pd.isna(max_value)):
+                # Convert 'selected column' column to numeric values in the numeric DataFrame
+                df_numeric[group_by_column] = pd.to_numeric(df_numeric[group_by_column], errors='coerce')
 
-        max_value = df_numeric[group_by_column].max(skipna=True)
+                max_range_meters = round(max_value)
+                range_bins = generate_range_bins(range_resolution_meters, max_range_meters)
+                generated_list = generate_list_with_difference(len(range_bins), range_resolution_meters)
 
-        if(not df_numeric.empty and not pd.isna(max_value)):
-            # Convert 'selected column' column to numeric values in the numeric DataFrame
-            df_numeric[group_by_column] = pd.to_numeric(df_numeric[group_by_column], errors='coerce')
+                # Define custom bins for range grouping in the numeric DataFrame
+                bins = generated_list
+                labels = range_bins
 
-            max_range_meters = round(max_value)
-            range_bins = generate_range_bins(range_resolution_meters, max_range_meters)
-            generated_list = generate_list_with_difference(len(range_bins), range_resolution_meters)
+                # Create a new column 'range_name' based on the range of 'Species' values in the numeric DataFrame
+                df_numeric[range_name] = pd.cut(df_numeric[group_by_column], bins=bins, labels=labels[:-1], right=False)
 
-            # Define custom bins for range grouping in the numeric DataFrame
-            bins = generated_list
-            labels = range_bins
+                # Group by 'group_by_column' in the numeric DataFrame and sum the 'Value' for each range
+                grouped_numeric_data = df_numeric.groupby(range_name).size().reset_index()
 
-            # Create a new column 'range_name' based on the range of 'Species' values in the numeric DataFrame
-            df_numeric[range_name] = pd.cut(df_numeric[group_by_column], bins=bins, labels=labels[:-1], right=False)
+                grouped_str_data = df_str.groupby(group_by_column).size().reset_index()
+                
+                # Concatenate the dataframes vertically
+                merged_df = pd.concat([grouped_numeric_data, grouped_str_data], ignore_index=True)
 
-            # Group by 'group_by_column' in the numeric DataFrame and sum the 'Value' for each range
-            grouped_numeric_data = df_numeric.groupby(range_name).size().reset_index()
+                # Convert 'Column1' to object data type
+                merged_df[range_name] = merged_df[range_name].astype('object')
+                merged_df[group_by_column] = merged_df[group_by_column].astype('object')
 
-            grouped_str_data = df_str.groupby(group_by_column).size().reset_index()
-            
-            # Concatenate the dataframes vertically
-            merged_df = pd.concat([grouped_numeric_data, grouped_str_data], ignore_index=True)
+                # Update 'Column1' with 'Column2' values where 'Column1' is NaN
+                merged_df[range_name].fillna(merged_df[group_by_column], inplace=True)
 
-            # Convert 'Column1' to object data type
-            merged_df[range_name] = merged_df[range_name].astype('object')
-            merged_df[group_by_column] = merged_df[group_by_column].astype('object')
-
-            # Update 'Column1' with 'Column2' values where 'Column1' is NaN
-            merged_df[range_name].fillna(merged_df[group_by_column], inplace=True)
-
-            # Drop the 'extra if exist' column
-            merged_df.drop(group_by_column, axis=1, inplace=True)
-            merged_df.columns = [group_by_column, "Values"]
-        elif (group_by_column in array_string_type()):
-            # Method 2: Using value_counts
-            all_names = [name for names_list in self.data[group_by_column] for name in names_list]
-            merged_df = pd.Series(all_names).value_counts().reset_index()
-            merged_df.columns = [group_by_column, 'Values']
+                # Drop the 'extra if exist' column
+                merged_df.drop(group_by_column, axis=1, inplace=True)
+                merged_df.columns = [group_by_column, "Values"]
+            elif (group_by_column in array_string_type()):
+                # Method 2: Using value_counts
+                all_names = [name for names_list in self.data[group_by_column] for name in names_list]
+                merged_df = pd.Series(all_names).value_counts().reset_index()
+                merged_df.columns = [group_by_column, 'Values']
+            else:
+                # replace dot with underscore
+                quantitative_replace_dot_with_underscore = parser_change_dot_to_underscore(self.data.columns)
+                quantitative_data = tuple(quantitative_replace_dot_with_underscore)
+                # Group the data by the 'Category' column
+                grouped_data = self.data.groupby(group_by_column).size()
+                grouped_data = grouped_data.reset_index()
+                grouped_data = pd.DataFrame(grouped_data)
+                grouped_data.columns = [group_by_column, "Values"]
+                merged_df = grouped_data
         else:
-            # replace dot with underscore
-            quantitative_replace_dot_with_underscore = parser_change_dot_to_underscore(self.data.columns)
-            quantitative_data = tuple(quantitative_replace_dot_with_underscore)
-            # Group the data by the 'Category' column
-            grouped_data = self.data.groupby(group_by_column).size()
-            grouped_data = grouped_data.reset_index()
-            grouped_data = pd.DataFrame(grouped_data)
-            grouped_data.columns = [group_by_column, "Values"]
-            merged_df = grouped_data
+            # group by column here follows this format parent_tag*search_key
+            search_key = group_by_column.split('*')
+            print(search_key)
+            merged_df_ = self.data[self.data[search_key[0]] == search_key[1]]
+            # Group by year and 'Category', and count records
+            merged_df = merged_df_.groupby([
+                merged_df_['bibliography_year'], 
+                search_key[0]
+            ]).size().reset_index(name='Values')
+            group_by_column = "bibliography_year"
+
+            # merged_df = merged_df[['bibliography_year', 'Values']]
 
         # Filter rows where 'Age' column value is greater than zero
         merged_df = merged_df[merged_df["Values"] > 0]
@@ -112,8 +124,15 @@ class Pages:
 
         range_resolution_meters = columns_range_limit.get(selected_content) if columns_range_limit.get(selected_content) else 0.2
         df_, pivot_col_ = self.dashboard_helper_exemption(selected_content, "range_values", range_resolution_meters)
+        print(df_)
+        # Resetting the index to maintain the original order
+        df_.reset_index(drop=True, inplace=True)
 
-        return Graph.plot_bar_chat(df_, pivot_col_, conf).to_dict()
+        # sort records and get the first 20
+        sorted_df = df_.sort_values(by='Values', ascending=False).head(20)
+    
+        chart_obj = Graph.plot_bar_chat(sorted_df, pivot_col_, conf).to_dict()
+        return chart_obj, df_
 
     def EDA_view(self, selected_chunk_perc=10, selected_columns_to_vis:list=[]):
         perc = [i for i in range(10, 101, 10)]

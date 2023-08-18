@@ -399,8 +399,11 @@ def replace_and_separate(text):
     ]
 
     # Replace the substrings with 'pdbx' or 'rcsb'
-    for pattern in patterns:
-        text = re.sub(pattern, 'pdbx_' if pattern.startswith('^pdbx') else 'rcsb_', text)
+    try:
+        for pattern in patterns:
+            text = re.sub(pattern, 'pdbx_' if pattern.startswith('^pdbx') else 'rcsb_', text)
+    except (Exception, TypeError, ValueError) as e:
+        print(e)
 
     return text
     
@@ -464,7 +467,9 @@ def summaryStatisticsFilterOptions():
 
 
 def removeUnderscoreIDFromList(_list):
-    cleaned_list = [item[:-3] if item.endswith('_id') else item for item in _list]
+    cleaned_list = [item for item in _list if not item.endswith("_id") and not item.endswith("_id_pub_med")]
+    print("We are print out the len of these lists")
+    print(len(_list), len(cleaned_list))
     return cleaned_list
 
 
@@ -501,3 +506,11 @@ def create_json_response(httpResponse=False, data=None, status=None, status_code
 
 def convert_json_to_dict(json_response):
     return json.loads(json_response)
+
+
+def find_dict_with_value_in_nested_data(array_of_dicts, search_value):
+    for data_dict in array_of_dicts:
+        for inner_dict in data_dict["data"]:
+            if inner_dict["value"] == search_value:
+                return data_dict
+    return None

@@ -5,7 +5,8 @@ from src.implementation.Helpers.fields_helper import date_grouping_methods, \
     graph_group_by_others, graph_options, graph_selection_categories_UI_kit, \
     graph_types_kit, grouping_aggregation_methods, machine_algorithms_helper_kit, \
     merge_graph_into_one_kit, multi_select_kit, normalization_algorithms_helper_kit, \
-    quantification_fields_kit, missing_algorithms_helper_kit, perc_of_missing_value_kit
+    quantification_fields_kit, missing_algorithms_helper_kit, perc_of_missing_value_kit, \
+    dataSplitPercOption, PCAComponentsOption
 
 from src.middlewares.auth_middleware import token_required
 
@@ -83,5 +84,29 @@ class dimensionalityReductionOptions(Resource):
     # @token_required
     def get(self):
         result = dimensionality_reduction_algorithms_helper_kit()
+        # Return the result as JSON using Flask's jsonify function
+        return jsonify(result)
+    
+
+
+class dataSplitPercOptions(Resource):
+    def __init__(self):
+        pass
+    # @staticmethod
+    # @token_required
+    def get(self):
+        result = dataSplitPercOption()
+        # Return the result as JSON using Flask's jsonify function
+        return jsonify(result)
+    
+
+class PCAComponentsOptions(Resource):
+    def __init__(self):
+        pass
+    # @staticmethod
+    # @token_required
+    def get(self):
+        features = request.args.get('n_features', 2)
+        result = PCAComponentsOption(features)
         # Return the result as JSON using Flask's jsonify function
         return jsonify(result)

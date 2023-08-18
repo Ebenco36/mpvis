@@ -76,31 +76,31 @@ def stats_data():
                 "name"  : "Overall"
             },
             {
-                "value" : "rcsb_entry_info_experimental_method-xray", 
+                "value" : "rcsb_entry_info_experimental_method*X-ray", 
                 "name"  : "by X-ray",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method-nmr", 
+                "value" : "rcsb_entry_info_experimental_method*NMR", 
                 "name"  : "by NMR",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method-EM", 
+                "value" : "rcsb_entry_info_experimental_method*EM", 
                 "name"  : "by Electron Microscopy",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method-MM", 
+                "value" : "rcsb_entry_info_experimental_method*MM", 
                 "name"  : "by Multi-method",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method-ProteinOnly", 
+                "value" : "rcsb_entry_info_experimental_method*ProteinOnly", 
                 "name"  : "by Protein-only",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method-PNAC", 
+                "value" : "rcsb_entry_info_experimental_method*PNAC", 
                 "name"  : "by Protein-Nucleic Acid Complexes",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method-AS", 
+                "value" : "rcsb_entry_info_experimental_method*AS", 
                 "name"  : "by Assembly Symmetry",
             }
         ]

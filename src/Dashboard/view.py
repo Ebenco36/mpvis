@@ -16,9 +16,9 @@ from src.implementation.data.columns.quantitative.quantitative_array import quan
 from src.implementation.Helpers.machine_learning_al.normalization import Normalization
 from src.implementation.data.columns.norminal import descriptors
 from src.implementation.exceptions.AxisExceptions import AxisException
-from src.implementation.Helpers.helper import parser_change_dot_to_underscore
+from src.implementation.Helpers.helper import find_dict_with_value_in_nested_data
 from src.implementation.basic_plots import home_page_graph
-from vega_datasets import data
+from src.implementation.Helpers.helper import tableHeader
 from src.middlewares.auth_middleware import token_required
 
 user_schema = UserSchema()
@@ -69,7 +69,7 @@ class Dashboard(Resource):
         group_graph_array = []
 
         for (key, graph) in enumerate(unique_group_list):
-            group_graph = self.pages.view_dashboard(graph, conf)
+            group_graph, _ = self.pages.view_dashboard(graph, conf)
             obj = {
                 "chart_obj": group_graph,
                 "id": "graph" + str(key),
@@ -113,16 +113,21 @@ class SummaryStatistics(Resource):
         group_field_selection = request.args.get('field_selection', 'Species')
 
         parent_data, summary_search_filter_options, group_field_selection = summaryStatisticsConverter(group_field_selection)
+        group_dict = find_dict_with_value_in_nested_data(stats_data(), group_field_selection)
         if (check_which_page == "stats-categories"):
             data = parent_data
         else:
             conf = request.args.get('chart_conf', '{"color": "#a855f7", "opacity": 0.9}')
             conf = json.loads(conf)
-            group_graph = self.pages.view_dashboard(group_field_selection, conf)
+            group_graph, dataframe = self.pages.view_dashboard(group_field_selection, conf)
             merged_list = summary_search_filter_options
+            sorted_frame = dataframe.sort_values(by='Values', ascending=False).to_dict('records')
             data = {
+                "group_dict"    : group_dict,
                 "search_object" : merged_list,
                 "data"          : group_graph,
+                "headers"       : tableHeader(dataframe.columns),
+                "dataframe"     : sorted_frame,
                 "search_key"    : group_field_selection,
                 "status"        : 'success',
             }

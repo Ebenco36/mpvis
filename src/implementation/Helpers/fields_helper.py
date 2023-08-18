@@ -178,6 +178,22 @@ def ml_slider_selector(quantitative_data):
 
 
 
+def dataSplitPercOption():
+    start = 0.1
+    end = 0.5
+    step = 0.1  # Adjust the step size based on your preference
+    numbers = [str(round(start + i * step, 1)) for i in range(int((end - start) / step) + 1)]
+    data = transform_data_view(numbers, 'data_split_perc_option', 'single')
+
+    return data
+
+def PCAComponentsOption(n_features = 2):
+    data = [str(i) for i in range(2, int(n_features)+1)]
+    data = transform_data_view(data, 'PCA_n_feature_option', 'single')
+
+    return data
+
+
 def transform_data_view(data, unique_field_name, multiple_selection):
     data_object = {
         "options": [{"value": value, "name": format_string_caps(replace_and_separate(value))} for value in data],

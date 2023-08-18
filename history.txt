@@ -78,5 +78,8 @@ mklink "C:\ProgramData\Anaconda3\DLLs\libcrypto-1_1-x64.dll" "C:\ProgramData\Ana
 pip install bioseq
 pip install biopython
 
+When you have error_message
+pip install -r requirements.txt (This will fix most of your issues. Especially when it has a lot to do with packages.)
+pip install --upgrade attrs
 
-curl --data "selected_column=['cell_angle_alpha', 'cell_angle_beta', 'cell_angle_gamma', 'cell_length_a']" http://127.0.0.1:8000/api/v1/UOT?request-type=stage1
+

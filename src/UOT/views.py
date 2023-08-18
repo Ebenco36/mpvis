@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from src.implementation.Helpers.helper import removeUnderscoreIDFromList
 from src.implementation.Helpers.Regressors.index import Regressors
 from src.implementation.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
+from src.implementation.data.columns.remove_columns import not_needed_columns
 from src.implementation.Helpers.machine_learning_al.normalization import Normalization
 from src.implementation.Helpers.machine_learning_al.sklearnML import MachineLearning
 from src.implementation.Helpers.helper import create_json_response
@@ -21,57 +22,36 @@ class UOT(Resource):
 
         self.dataset = data_import.loadFile()
 
-        # Columns to remove
-        columns_to_remove = ['Unnamed: 0', 'Unnamed: 0_x', 'Unnamed: 0_1', 'Unnamed: 0_y']
-
-        self.dataset.drop(columns=columns_to_remove, inplace=True)
+        self.dataset.drop(columns=not_needed_columns, inplace=True)
 
         self.parser = reqparse.RequestParser()
 
     
 
     def get(self):
-        args = self.parser.parse_args()
         # Get the pagination parameters from the query string
         page = request.args.get('request-type', 'stage1')
         # Session name to create a folder for current user
         session_name = request.args.get('session_name', 'Ebenezer_Awotoro_001')
-        # Target column as label
-        target = request.args.get('target', 'Resolution')
-        # Target column as label
-        training_or_testing = request.args.get('training_or_testing', "training")
+        
         path = "./public/data_sessions/" + session_name
 
         if(page == "stage1"):
             return self.get_attributes()
         elif(page == "stage2"):
-            method = request.args.get('method', 'random_forest_regressor')
+            method = request.args.get('method', 'simple_regressor')
             allowed_perc_of_emptiness = request.args.get('allowed_perc_of_emptiness', 10)
             return self.manage_missing_values(path, method, allowed_perc_of_emptiness) 
-        # elif(page == "stage3"):
-        #     # Target column as label
-        #     split_ratio = request.args.get('split_ratio', 0.2)
-        #     return self.generate_train_test_split(path=path, target=target, split_ratio=split_ratio)
-        # elif(page == "stage4"):
-        #     # Target column as label
-        #     method = request.args.get('method', "min_max_normalization")
-        #     return self.normalization_stage(path, method, training_or_testing)
-        # elif(page == "stage5"):
-        #     # Target column as label
-        #     method = request.args.get('method', "pca_algorithm")
-        #     pca_features = request.args.get('pca_features', 2)
-        #     pca_columns = request.args.get('pca_columns', 2)
-        #     return self.dimensionality_reduction(path, method, training_or_testing, pca_features, pca_columns)
-        
+
+
     def post(self):
-        args = self.parser.parse_args()
         # Get the pagination parameters from the query string
         page = request.args.get('request-type', 'stage2')
         # Target column as label
         training_or_testing = request.args.get('training_or_testing', "training")
         # Get JSON data from the POST request
         post_data = request.get_json()
-        print(post_data)
+        
         # Target column as label
         target = post_data.get('target', 'Resolution')
         session_name = post_data.get('session_name', 'Ebenezer_Awotoro_001')
@@ -92,12 +72,12 @@ class UOT(Resource):
             # Target column as label
             method = post_data.get('method', "pca_algorithm")
             pca_features = post_data.get('pca_features', 2)
-            pca_columns = post_data.get('pca_columns', 2)
-            return self.dimensionality_reduction(path, method, training_or_testing, pca_features, pca_columns)
-        
+            return self.dimensionality_reduction(path, method, training_or_testing, pca_features)
         
     def get_attributes(self):
-        myList =  self.dataset.select_dtypes(include=['number', 'int', 'float']).columns.tolist()
+        # Remove columns without any content
+        df_cleaned = self.dataset.dropna(axis=1, how='all')
+        myList =  df_cleaned.select_dtypes(include=['number', 'int', 'float']).columns.tolist()
         header = sorted(removeUnderscoreIDFromList(myList))
 
         return create_json_response(
@@ -244,16 +224,20 @@ class UOT(Resource):
         """
             This is needed on the split stage
         """
+        response = {
+            "data": data.to_dict('records'),
+            "headers": tableHeader(data.columns)
+        }
         return create_json_response(
             httpResponse=True, 
-            data=data.to_dict('records'), 
+            data=response, 
             status=True, 
             status_code=200, 
             message="Retrieved normalized successfully"
         )
 
 
-    def dimensionality_reduction(self, path:str, method:str, training_or_testing="training", pca_features=2, pca_columns=2):
+    def dimensionality_reduction(self, path:str, method:str, training_or_testing="training", pca_features=2):
         """
             We can proceed with this if atrributes selected are more the 2
         """
@@ -261,19 +245,25 @@ class UOT(Resource):
         df.drop(columns=['Unnamed: 0'], inplace=True)
 
         # Select method to fill emptiness
-        pca_columns=["PCA_"+str(i) for i in range(1, pca_features+1)]
+        pca_columns=["PCA_"+str(i) for i in range(1, int(pca_features)+1)]
 
-        DR_algorithm = DimensionalityReduction(X=df, n_features=pca_features, pca_columns=pca_columns)
-        data = getattr(DR_algorithm, str(method))()
+        DR_algorithm = DimensionalityReduction(X=df, n_features=int(pca_features), pca_columns=pca_columns)
+        data, explainability = getattr(DR_algorithm, str(method))()
 
         # Save the dataframe for the next phase
         data.to_csv(path + "/dataset_" + training_or_testing + "_dimensionalized.csv")
         """
             This is needed on the split stage
         """
+        # print(explainability)
+        response = {
+            "data": data.to_dict('records'),
+            "headers": tableHeader(data.columns),
+            "explainability": explainability,
+        }
         return create_json_response(
             httpResponse=True, 
-            data=data.to_dict('records'), 
+            data=response, 
             status=True, 
             status_code=200, 
             message="Retrieved dimensionalized data successfully"

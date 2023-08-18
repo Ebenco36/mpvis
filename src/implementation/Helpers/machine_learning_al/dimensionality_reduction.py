@@ -2,62 +2,91 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.random_projection import GaussianRandomProjection
 from sklearn.manifold import LocallyLinearEmbedding
-from sklearn.decomposition import PCA, FastICA
+from sklearn.decomposition import PCA, FastICA, TruncatedSVD, NMF, FactorAnalysis
 from sklearn.manifold import TSNE
 from sklearn.manifold import Isomap
 import pandas as pd
 import numpy as np
+import json
+import altair as alt
 
 class DimensionalityReduction:
-    def __init__(self, X, n_features=2, pca_columns=2):
+    def __init__(self, X, n_features=2, pca_columns:list=[]):
         self.X = X
         self.n_features = n_features if n_features > 1 else 2
         self.dr_columns = pca_columns
 
     def pca_algorithm(self):
-        pca = PCA(self.n_features).fit(self.X)
-        pca_data = pca.transform(self.X)
-        data = pd.DataFrame(pca_data, columns=self.dr_columns)
+        model = PCA(self.n_features).fit(self.X)
+        model_data = model.transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
 
-        return data
+        return data, explainable
     
-    def lda_algorithm(self):
-        lda = LinearDiscriminantAnalysis(n_components=self.n_features).fit(self.X)
-        lda_data = lda.transform(self.X)
-        data = pd.DataFrame(lda_data, columns=self.dr_columns)
+    def TruncatedSVD_algorithm(self):
+        model = TruncatedSVD(self.n_features).fit(self.X)
+        model_data = model.transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
 
-        return data
+        return data, explainable
+    
+    def NMF_algorithm(self):
+        model = NMF(self.n_features).fit(self.X)
+        model_data = model.transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
+
+        return data, explainable
+    
+    def FactorAnalysis_algorithm(self):
+        model = FactorAnalysis(self.n_features).fit(self.X)
+        model_data = model.transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
+
+        return data, explainable
+    # def lda_algorithm(self):
+    #     lda = LinearDiscriminantAnalysis(n_components=self.n_features).fit(self.X)
+    #     lda_data = lda.transform(self.X)
+    #     data = pd.DataFrame(lda_data, columns=self.dr_columns)
+
+    #     return data
     
     def ica_algorithm(self):
-        ica = FastICA(n_components=self.n_features).fit(self.X)
-        ica_data = ica.transform(self.X)
-        data = pd.DataFrame(ica_data, columns=self.dr_columns)
+        model = FastICA(n_components=self.n_features).fit(self.X)
+        model_data = model.transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
 
-        return data
+        return data, explainable
     
     def gaussian_random_proj_algorithm(self):
-        grp = GaussianRandomProjection(n_components=self.n_features).fit(self.X)
-        grp_data = grp.transform(self.X)
-        data = pd.DataFrame(grp_data, columns=self.dr_columns)
+        model = GaussianRandomProjection(n_components=self.n_features).fit(self.X)
+        model_data = model.transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
 
-        return data
-    
+        return data, explainable
     
     def tsne_algorithm(self):
         # Reshape the scalar to a 2D array
         # data_2d = np.array(self.X).reshape(-1, 1)
-        tsne = TSNE(n_components=self.n_features)
-        tsne_data = tsne.fit_transform(self.X)
-        data = pd.DataFrame(tsne_data, columns=self.dr_columns)
+        model = TSNE(n_components=self.n_features)
+        model_data = model.fit_transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
 
-        return data
+        return data, explainable
     
     def isomap_algorithm(self):
-        isomap = Isomap(n_components=self.n_features)
-        isomap_data = isomap.fit_transform(self.X)
-        data = pd.DataFrame(isomap_data, columns=self.dr_columns)
+        model = Isomap(n_components=self.n_features)
+        model_data = model.fit_transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = self.explainable(model, self.X.columns)
 
-        return data
+        return data, explainable
     
 
     def pca_contribution(self, data, data_  , n_components):
@@ -106,5 +135,42 @@ class DimensionalityReduction:
     #     return data
 
 
-    def explainable():
-        pass
+    def explainable(self, model, features:list = []):
+        n_components = model.components_
+        explained_variance_ratio = None
+
+        if hasattr(model, 'explained_variance_ratio_'):
+            explained_variance_ratio = model.explained_variance_ratio_
+
+        # Given NDArray
+        data_array = n_components
+
+        # Convert the array to a Pandas DataFrame
+        df = pd.DataFrame(data_array, columns=features)
+        data_transformed = df.T
+        data_transformed.columns = self.dr_columns
+
+        # Create a list to store individual charts
+        charts = []
+        
+        # Loop through the columns and create charts
+        for col in self.dr_columns:
+            chart = alt.Chart(data_transformed.reset_index()).mark_bar().encode(
+                x='index',
+                y=col,
+                color=alt.value('blue')
+            ).properties(
+                title=f'Plot of {col} against x (Attributes)'
+            )
+            charts.append(chart)
+
+        # Concatenate the charts vertically
+        combined_charts = alt.hconcat(*charts)
+
+        graph_data = combined_charts.to_dict()
+
+        return {
+            "explained_variance_ratio": explained_variance_ratio.tolist() if not explained_variance_ratio is None else [],
+            "n_components": n_components.tolist(),
+            "graph_data": graph_data,
+        }
