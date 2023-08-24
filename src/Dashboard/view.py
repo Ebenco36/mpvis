@@ -134,6 +134,13 @@ class SummaryStatistics(Resource):
         return jsonify(data)
 
 
+class SummaryStatisticsLines(Resource):
+
+    def __init__(self):
+        pass
+
+    def get(self):
+        pass
 
 class UseCases(Resource):
     def __init__(self):

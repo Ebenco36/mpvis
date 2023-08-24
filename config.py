@@ -15,11 +15,8 @@ DATA_FOLDER=os.path.join('public', 'DATA_UPLOAD')
 
 
 APP_DIR = os.path.dirname(__file__)
-print(APP_DIR)
 ROOT_DIR = os.path.dirname(APP_DIR)
-print(ROOT_DIR)
 DIST_DIR = os.path.join(APP_DIR, 'dist')
-print(DIST_DIR)
 if not os.path.exists(DIST_DIR):
     raise Exception(
         'DIST_DIR not found: {}'.format(DIST_DIR))

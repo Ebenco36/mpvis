@@ -72,7 +72,7 @@ def stats_data():
         "section": 'released_structure_per_year', 
         "data": [
             {
-                "value" : "sdds", 
+                "value" : "rcsb_entry_info_experimental_method", 
                 "name"  : "Overall"
             },
             {
@@ -88,23 +88,28 @@ def stats_data():
                 "name"  : "by Electron Microscopy",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method*MM", 
+                "value" : "rcsb_entry_info_experimental_method*Multiple methods", 
                 "name"  : "by Multi-method",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method*ProteinOnly", 
+                "value" : "rcsb_entry_info_selected_polymer_entity_types*Protein (only)", 
                 "name"  : "by Protein-only",
             },
             {
-                "value" : "rcsb_entry_info_experimental_method*PNAC", 
+                "value" : "rcsb_entry_info_selected_polymer_entity_types*Protein/NA", 
                 "name"  : "by Protein-Nucleic Acid Complexes",
             },
+            # {
+            #     "value" : "rcsb_entry_info_experimental_method*AS", 
+            #     "name"  : "by Assembly Symmetry",
+            # },
             {
-                "value" : "rcsb_entry_info_experimental_method*AS", 
-                "name"  : "by Assembly Symmetry",
+                "value" : "rcsb_entry_info_experimental_method", 
+                "name"  : "By Methods"
             }
         ]
     })
+
 
     return data
 

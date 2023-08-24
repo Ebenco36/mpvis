@@ -18,12 +18,12 @@ class Regressors:
         imputed_data = self.data.copy()
         if (imputed_data.empty):
             response = create_json_response(
-                httpResponse=True, 
-                data=imputed_data, 
+                httpResponse=False, 
+                data=[], 
                 status=False, 
                 status_code=200, 
                 message="Filtering option removes all records. Data is empty", 
-                error_message=""
+                error_message="Filtering option removes all records. Data is empty. Kindly adjust the filter to a value more than what was selected earlier."
             )
             return response
         # columns = not_needed_columns

@@ -350,7 +350,6 @@ def generate_range_bins(range_resolution, max_range):
     return range_bins_str
 
 def generate_list_with_difference(num_elements, difference):
-    print(num_elements)
     result_list = [round_to_2dp(i * difference) for i in range(num_elements)]
     return result_list
 
@@ -379,7 +378,6 @@ def remove_html_tags(text):
             return ''
     
     except (Exception, TypeError) as e:
-        print(text)
         print(str(e))
 
 
@@ -468,8 +466,6 @@ def summaryStatisticsFilterOptions():
 
 def removeUnderscoreIDFromList(_list):
     cleaned_list = [item for item in _list if not item.endswith("_id") and not item.endswith("_id_pub_med")]
-    print("We are print out the len of these lists")
-    print(len(_list), len(cleaned_list))
     return cleaned_list
 
 

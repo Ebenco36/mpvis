@@ -95,7 +95,7 @@ class Pages:
         else:
             # group by column here follows this format parent_tag*search_key
             search_key = group_by_column.split('*')
-            print(search_key)
+            
             merged_df_ = self.data[self.data[search_key[0]] == search_key[1]]
             # Group by year and 'Category', and count records
             merged_df = merged_df_.groupby([
@@ -124,7 +124,7 @@ class Pages:
 
         range_resolution_meters = columns_range_limit.get(selected_content) if columns_range_limit.get(selected_content) else 0.2
         df_, pivot_col_ = self.dashboard_helper_exemption(selected_content, "range_values", range_resolution_meters)
-        print(df_)
+        
         # Resetting the index to maintain the original order
         df_.reset_index(drop=True, inplace=True)
 

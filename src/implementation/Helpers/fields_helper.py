@@ -1,3 +1,4 @@
+import numpy as np
 from src.implementation.Helpers.helper import extract_function_names, replace_and_separate, \
     filter_list, format_string_caps
 from src.implementation.data.columns.dates import dates_columns
@@ -161,16 +162,21 @@ def merge_graph_into_one_kit(kit_id:int=0):
     return merge_graph_options
 
 
-def ml_slider_selector(quantitative_data):
+def test_or_train_kit(kit_id:int=0):
+    options = ["training", "testing"]
+    options = transform_data_view(options, 'train_test_option', 'single')
+    return options
+
+def ml_slider_selector():
     """
         Select these option based on the ML selected
     """
-    option_list = len(quantitative_data) if len(quantitative_data) >=2 else 2
-    eps_slider = [0.1, 10.0, 0.3]
-    pca_features_slider = option_list
-    min_samples_slider = option_list
-    n_clusters_slider = option_list
-    n_components_slider = option_list
+    option_list = [str(i) for i in range(1, 11)]
+    eps_slider = transform_data_view([str(round(i, 2)) for i in np.arange(0.1, 10.0, 0.2)], "eps (epsilon)", "single")
+    pca_features_slider = transform_data_view(option_list, "pca_features", "single")
+    min_samples_slider = transform_data_view(option_list, "min_samples", "single")
+    n_clusters_slider = transform_data_view(option_list, "n_clusters", "single")
+    n_components_slider = transform_data_view(option_list, "n_components", "single")
 
     # date_group_by = transform_data_view(classes_options, 'date_group_by')
 

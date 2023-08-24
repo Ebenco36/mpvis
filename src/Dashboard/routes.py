@@ -1,7 +1,7 @@
 from src.Dashboard.view import Dashboard, SummaryStatistics, UseCases
 from src.Filters.view import Filters, MissingFilterKit, allowMissingPerc, \
     dimensionalityReductionOptions, normalizationOptions, dataSplitPercOptions, \
-    PCAComponentsOptions
+    PCAComponentsOptions, MachineLearningOptions, GraphOptions, trainAndTestSplitOptions
 
 def routes(api):
     api.add_resource(Dashboard, '/dashboard')
@@ -13,4 +13,7 @@ def routes(api):
     api.add_resource(PCAComponentsOptions, '/PCA-components-options-kit')
     api.add_resource(normalizationOptions, '/normalization-options-kit')
     api.add_resource(dimensionalityReductionOptions, '/dimensionality-reduction-options-kit')
+    api.add_resource(MachineLearningOptions, '/machine-learning-options-kit')
+    api.add_resource(trainAndTestSplitOptions, '/train-and-test-split-options-kit')
+    api.add_resource(GraphOptions, '/graph-options-kit')
     api.add_resource(UseCases, '/get-use-cases')

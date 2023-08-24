@@ -25,7 +25,6 @@ class LoginApi(Resource):
         """
         input_data = request.get_json()
         response, status = login_user(request, input_data)
-        print(response)
         return make_response(response, status)
 
 

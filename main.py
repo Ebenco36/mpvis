@@ -38,7 +38,6 @@ def create_app():
     # interval example
     @scheduler.task(id='do_job_1', trigger=trigger)
     def mpstruct_job():
-        print("Whatsup")
         mpstruct = MPSTRUCT()
         mpstruct.load_data().parse_data()
         print("Work is on going MPSTRUCT...")
@@ -50,7 +49,6 @@ def create_app():
     # interval example
     @scheduler.task(id='do_job_1', trigger=trigger_pdb)
     def pdb_job():
-        print("Whatsup")
         pdb = PDBJOBS()
         pdb.load_data().parse_data()
         print("Work is on going PDB...")

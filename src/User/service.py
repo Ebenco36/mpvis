@@ -24,7 +24,6 @@ def create_user(request, input_data):
     """
     create_validation_schema = CreateSignupInputSchema()
     errors = create_validation_schema.validate(input_data)
-    print(input_data)
     if errors:
         return generate_response(message=errors)
     check_username_exist = UserModel.query.filter_by(

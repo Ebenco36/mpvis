@@ -1,9 +1,11 @@
 import os
+import altair as alt
 import pandas as pd
 from pathlib import Path
 import json
 from src.implementation.visualization import DataImport
 from flask import jsonify, request
+from src.implementation.graphs.helpers import Graph
 from sklearn.model_selection import train_test_split
 from src.implementation.Helpers.helper import removeUnderscoreIDFromList
 from src.implementation.Helpers.Regressors.index import Regressors
@@ -12,7 +14,9 @@ from src.implementation.data.columns.remove_columns import not_needed_columns
 from src.implementation.Helpers.machine_learning_al.normalization import Normalization
 from src.implementation.Helpers.machine_learning_al.sklearnML import MachineLearning
 from src.implementation.Helpers.helper import create_json_response
+from src.implementation.exceptions.AxisExceptions import AxisException
 from src.implementation.Helpers.helper import tableHeader
+from src.implementation.Helpers.fields_helper import transform_data_view
 from flask_restful import Resource, reqparse
 
 class UOT(Resource):
@@ -30,7 +34,7 @@ class UOT(Resource):
 
     def get(self):
         # Get the pagination parameters from the query string
-        page = request.args.get('request-type', 'stage1')
+        page = request.args.get('request_type', 'stage1')
         # Session name to create a folder for current user
         session_name = request.args.get('session_name', 'Ebenezer_Awotoro_001')
         
@@ -41,12 +45,16 @@ class UOT(Resource):
         elif(page == "stage2"):
             method = request.args.get('method', 'simple_regressor')
             allowed_perc_of_emptiness = request.args.get('allowed_perc_of_emptiness', 10)
-            return self.manage_missing_values(path, method, allowed_perc_of_emptiness) 
+            return self.manage_missing_values(path, method, allowed_perc_of_emptiness)
+        elif(page == "stage6"):
+            return self.get_train_and_test_headers(path)
+        elif(page == "stage7"):
+            return self.ML_explainability_implementation(path)
 
 
     def post(self):
         # Get the pagination parameters from the query string
-        page = request.args.get('request-type', 'stage2')
+        page = request.args.get('request_type', 'stage2')
         # Target column as label
         training_or_testing = request.args.get('training_or_testing', "training")
         # Get JSON data from the POST request
@@ -60,19 +68,30 @@ class UOT(Resource):
         if(page == "stage2"):
             selected_column = post_data.get('selected_column', [])
             return self.get_data_for_selected_attributes(target, selected_column, session_name)
-        elif(page == "stage3"):
+        elif(page == "stage5"):
             # Target column as label
             split_ratio = post_data.get('split_ratio', 0.2)
             return self.generate_train_test_split(path=path, target=target, split_ratio=split_ratio)
-        elif(page == "stage4"):
+        elif(page == "stage3"):
             # Target column as label
             method = post_data.get('method', "min_max_normalization")
-            return self.normalization_stage(path, method, training_or_testing)
-        elif(page == "stage5"):
+            return self.normalization_stage(path, method, target)
+        elif(page == "stage4"):
             # Target column as label
             method = post_data.get('method', "pca_algorithm")
             pca_features = post_data.get('pca_features', 2)
-            return self.dimensionality_reduction(path, method, training_or_testing, pca_features)
+            return self.dimensionality_reduction(path, method, pca_features, target)
+        elif(page == "stage6"):
+            # Target column as label
+            method = post_data.get('ml_method', "dbscan_clustering")
+            min_samples = post_data.get('min_samples', 2)
+            n_clusters = post_data.get('n_clusters', 2)
+            n_components = post_data.get('n_components', 2)
+            eps = post_data.get('eps', 0.2)
+            axis = post_data.get('axis', [])
+            chart_type = post_data.get('chart_type', "scatter_plot")
+            return self.implement_clustering(path, method, axis, chart_type, training_or_testing, n_clusters, min_samples, n_components, eps)
+
         
     def get_attributes(self):
         # Remove columns without any content
@@ -87,7 +106,6 @@ class UOT(Resource):
             status_code=200, 
             message="Headers fetch successfully"
         )
-
 
 
     def get_data_for_selected_attributes(self, target_column:str, selected_column:list, session_name:str):
@@ -127,9 +145,8 @@ class UOT(Resource):
         )
 
 
-
     def generate_train_test_split(self, split_ratio:float, path:str, target:str):
-        df = pd.read_csv(path + "/dataset_missing.csv", low_memory=False)
+        df = pd.read_csv(path + "/dataset_dimensionalized.csv", low_memory=False)
         df.drop(columns=['Unnamed: 0'], inplace=True)
         """
             Generate data split for training and testing
@@ -181,7 +198,7 @@ class UOT(Resource):
         data = getattr(Missing_algorithm, str(method))()
         response = data.get("data")
 
-        if(data and data.get("status")):
+        if(data and data.get("status") == True):
             dataframe = pd.concat([data.get('data'), target], axis=1)
             # Save the dataframe for the next phase
             dataframe.to_csv(path + "/dataset_missing.csv")
@@ -204,23 +221,24 @@ class UOT(Resource):
         )
     
 
-    def normalization_stage(self, path:str, method:str, training_or_testing="training"):
+    def normalization_stage(self, path:str, method:str, target:str):
         """
             Normalize data for optimal result
         """
 
-        if (training_or_testing == "training"):
-            df = pd.read_csv(path + "/dataset_train.csv", low_memory=False)
-        else:
-            df = pd.read_csv(path + "/dataset_test.csv", low_memory=False)
-        df.drop(columns=['Unnamed: 0'], inplace=True)
+        df = pd.read_csv(path + "/dataset_missing.csv", low_memory=False)
+        df_ = df.loc[:, df.columns != target]
+        target = df[target]
+        df_.drop(columns=['Unnamed: 0'], inplace=True)
         # Select method to fill emptiness
 
-        Normalization_algorithm = Normalization(df)
+        Normalization_algorithm = Normalization(df_)
         data = getattr(Normalization_algorithm, str(method))()
 
+        data = pd.concat([data, target], axis=1)
+
         # Save the dataframe for the next phase
-        data.to_csv(path + "/dataset_" + training_or_testing + "_normalized.csv")
+        data.to_csv(path + "/dataset_normalized.csv")
         """
             This is needed on the split stage
         """
@@ -237,21 +255,24 @@ class UOT(Resource):
         )
 
 
-    def dimensionality_reduction(self, path:str, method:str, training_or_testing="training", pca_features=2):
+    def dimensionality_reduction(self, path:str, method:str, pca_features, target:str):
         """
             We can proceed with this if atrributes selected are more the 2
         """
-        df = pd.read_csv(path + "/dataset_" + training_or_testing + "_normalized.csv", low_memory=False)
-        df.drop(columns=['Unnamed: 0'], inplace=True)
+        df = pd.read_csv(path + "/dataset_normalized.csv", low_memory=False)
+        df_ = df.loc[:, df.columns != target]
+        target = df[target]
+        df_.drop(columns=['Unnamed: 0'], inplace=True)
 
         # Select method to fill emptiness
         pca_columns=["PCA_"+str(i) for i in range(1, int(pca_features)+1)]
 
-        DR_algorithm = DimensionalityReduction(X=df, n_features=int(pca_features), pca_columns=pca_columns)
+        DR_algorithm = DimensionalityReduction(X=df_, n_features=int(pca_features), pca_columns=pca_columns)
         data, explainability = getattr(DR_algorithm, str(method))()
 
+        data = pd.concat([data, target], axis=1)
         # Save the dataframe for the next phase
-        data.to_csv(path + "/dataset_" + training_or_testing + "_dimensionalized.csv")
+        data.to_csv(path + "/dataset_dimensionalized.csv")
         """
             This is needed on the split stage
         """
@@ -270,26 +291,95 @@ class UOT(Resource):
         )
 
 
-    def implement_clustering(self, path:str, method:str):
+
+    """
+        We are doing this to get list of headers for users to select 
+        from to avoid issues plotting the chart accordingly
+    """
+    def get_train_and_test_headers(self, path):
+        train = pd.read_csv(path + "/dataset_train.csv", low_memory=False)
+        train.drop(columns=['Unnamed: 0'], inplace=True)
+
+        response = {
+            "train_header": transform_data_view(train.columns.tolist(), "Attributes", "multiple"),
+        }
+
+        return create_json_response(
+            httpResponse=True, 
+            data=response, 
+            status=True, 
+            status_code=200, 
+            message="Retrieved headers successfully"
+        )
+
+
+    def implement_clustering(self, path:str, method:str, axis:list, chart_type:str, training_or_testing:str = "training", n_clusters:int = 2, min_samples:int = 2, n_components:int = 2, eps:float = 0.2):
         """
             Allow various clustering algorithm options for user to understand the base concept
         """
-        df = pd.read_csv(path, low_memory=False)
+        if (training_or_testing == "training"):
+            df = pd.read_csv(path + "/dataset_train.csv", low_memory=False)
+
+        else:
+            df = pd.read_csv(path + "/dataset_test.csv", low_memory=False)
         df.drop(columns=['Unnamed: 0'], inplace=True)
         # Select method to fill emptiness
 
-        # ML_algorithm = MachineLearning(X=df, eps=eps, min_samples=min_samples, n_clusters=n_clusters, n_components=n_components)
-        # classified_, params  = getattr(ML_algorithm, str(method))()
+        ML_algorithm = MachineLearning(X=df, eps=eps, min_samples=min_samples, n_clusters=n_clusters, n_components=n_components, UOT=True, save_path=path)
+        data_frame, params, model_path  = getattr(ML_algorithm, str(method))()
+        get_chart = self.plot_chart(chart_type, data_frame, method, axis)
+        response = {
+            "header": tableHeader(data_frame.columns),
+            "data": data_frame.to_dict('records'),
+            "file": model_path,
+            "params": params,
+            "chart": get_chart
+        }
 
-        # print(data)
+        return create_json_response(
+            httpResponse=True, 
+            data=response, 
+            status=True, 
+            status_code=200, 
+            message="Your model has been saved to " + model_path
+        )
 
 
-    def ML_explainability_implementation():
+    def ML_explainability_implementation(self, path):
         """
             Explain reason for the immediate above methods
         """
-        pass
+        data = {
+            'X': [1, 2, 3, 4, 5],
+            'Y': [5, 4, 3, 2, 1],
+            'Z': [10, 8, 6, 4, 2]
+        }
 
+        df = pd.DataFrame(data)
+        chart = alt.Chart(df).mark_point().encode(
+            x='X',
+            y='Y',
+            color='Z'
+        )
+
+        return chart.to_dict()
+    
+
+    def plot_chart (self, chart_type, processed_df, ml_label, axis):
+        try:
+            graph_ml = Graph(processed_df)
+            graph_ml = graph_ml.set_properties(axis, ml_label)
+            altair_graph_obj_ml = getattr(graph_ml, chart_type)()
+            altair_graph_objj_ml = altair_graph_obj_ml\
+                .encoding(axis)\
+                .properties(width=800)\
+                .interactive()\
+                .legend_config()\
+                .return_obj()
+
+            return altair_graph_objj_ml.to_dict()
+        except (AxisException, ValueError) as ex:
+            print(str(ex))
 
     def data_summary():
         """

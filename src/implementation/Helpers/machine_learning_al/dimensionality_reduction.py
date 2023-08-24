@@ -102,7 +102,6 @@ class DimensionalityReduction:
             contributing_indices = np.argsort(np.abs(component))[::-1][:n_components]
             contributing_variables.append([data.columns[i] for i in contributing_indices])
 
-        print("Contributing Variables:")
         return contributing_variables
 
 
@@ -124,7 +123,6 @@ class DimensionalityReduction:
             # Append the sorted variables to the variable_contributions list
             variable_contributions.append(sorted_variables)
 
-        print("Variable Contributions:")
         return variable_contributions
 
     # def ile_algorithm(self):
