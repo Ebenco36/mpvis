@@ -44,7 +44,7 @@ class Pages:
             df_numeric = self.data[~mask_str]
             df_str = self.data[mask_str]
             max_value = df_numeric[group_by_column].max(skipna=True)
-            if(not df_numeric.empty and not pd.isna(max_value)):
+            if(not df_numeric.empty and not pd.isna(max_value) and group_by_column != "rcsb_entry_info_software_programs_combined"):
                 # Convert 'selected column' column to numeric values in the numeric DataFrame
                 df_numeric[group_by_column] = pd.to_numeric(df_numeric[group_by_column], errors='coerce')
 

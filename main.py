@@ -1,7 +1,10 @@
 import os
+import logging
 from flask import Flask
 from flask_jwt import JWT
 from SchedulerConfig import SConfig
+from src.User.model import UserModel
+from logging.handlers import RotatingFileHandler
 from src.utils.security import authenticate, identity
 from src.models.basemodel import db
 from flask_mail import Mail
@@ -18,12 +21,41 @@ mail = Mail()
 def initdb(flask_app):
     db.init_app(flask_app)
     with flask_app.app_context():
+        print("We are here!")
         db.create_all()  # Create database tables for our data models
         return flask_app
 
+def create_default_user(flask_app):
+    with flask_app.app_context():
+        check_user = UserModel.query.filter_by(username="admin").first()
+
+        if(not check_user):
+            default_user = UserModel(
+                name='admin', 
+                email='admin@example.com',
+                username='admin', 
+                phone='923928392832',
+                is_admin=1
+            )
+            default_user.hash_password("password")
+            db.session.add(default_user)
+            print(default_user)
+            db.session.commit()
+            return flask_app
     
 def create_app():
     flask_app = Flask(__name__, static_folder="./dist/static")
+
+    # set log config for application
+    # Configure logging to both console and file
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_handler = RotatingFileHandler('MPvisApp.log', maxBytes=10240, backupCount=10)
+    file_handler.setFormatter(formatter)
+    flask_app.logger.addHandler(file_handler)
+
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)  # Set the desired log level
+
     flask_app.config.from_object(SConfig())
     scheduler = APScheduler()
     # scheduler.api_enabled = True
@@ -96,22 +128,14 @@ def create_app():
 
     @flask_app.route('/')
     def index():
-        return 'Welcome to Flask Rest API Setup!'
-    
-    # @flask_app.route('/dashboard')
-    # def index_client():
-    #     dist_dir = current_app.config['DIST_DIR']
-    #     entry = os.path.join(dist_dir, 'index.html')
-    #     return send_file(entry)
+        return 'Welcome to MPvis Rest API Setup!'
 
-    @flask_app.route("/hello")
-    def hello():
-        return "Hello World!"
 
     # Initialize CORS with default options (allow all origins)
     CORS(flask_app)
 
-    # initdb(flask_app)
+    initdb(flask_app)
+    create_default_user(flask_app)
 
     return flask_app
 

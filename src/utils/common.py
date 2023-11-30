@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from src.utils.http_code import HTTP_200_OK, HTTP_201_CREATED
 
 
-def generate_response(data=None, message=None, status=400):
+def generate_response(data=None, message=None, status=200):
     """
     It takes in a data, message, and status, and returns a dictionary with the data, message, and status
     

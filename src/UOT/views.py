@@ -12,7 +12,7 @@ from src.implementation.Helpers.Regressors.index import Regressors
 from src.implementation.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
 from src.implementation.data.columns.remove_columns import not_needed_columns
 from src.implementation.Helpers.machine_learning_al.normalization import Normalization
-from src.implementation.Helpers.machine_learning_al.sklearnML import MachineLearning
+from src.implementation.Helpers.machine_learning_al.UnsupervisedMachineLearning import MachineLearning
 from src.implementation.Helpers.helper import create_json_response
 from src.implementation.exceptions.AxisExceptions import AxisException
 from src.implementation.Helpers.helper import tableHeader
@@ -84,13 +84,14 @@ class UOT(Resource):
         elif(page == "stage6"):
             # Target column as label
             method = post_data.get('ml_method', "dbscan_clustering")
-            min_samples = post_data.get('min_samples', 2)
-            n_clusters = post_data.get('n_clusters', 2)
-            n_components = post_data.get('n_components', 2)
-            eps = post_data.get('eps', 0.2)
+            model_path = post_data.get('model_path', "")
+            min_samples = int(post_data.get('min_samples', 2))
+            n_clusters = int(post_data.get('n_clusters', 2))
+            n_components = int(post_data.get('n_components', 2))
+            eps = float(post_data.get('eps', 0.2))
             axis = post_data.get('axis', [])
             chart_type = post_data.get('chart_type', "scatter_plot")
-            return self.implement_clustering(path, method, axis, chart_type, training_or_testing, n_clusters, min_samples, n_components, eps)
+            return self.implement_clustering(path, method, axis, chart_type, training_or_testing, n_clusters, min_samples, n_components, eps, model_path)
 
         
     def get_attributes(self):
@@ -313,21 +314,22 @@ class UOT(Resource):
         )
 
 
-    def implement_clustering(self, path:str, method:str, axis:list, chart_type:str, training_or_testing:str = "training", n_clusters:int = 2, min_samples:int = 2, n_components:int = 2, eps:float = 0.2):
+    def implement_clustering(self, path:str, method:str, axis:list, chart_type:str, training_or_testing:str = "training", n_clusters:int = 2, min_samples:int = 2, n_components:int = 2, eps:float = 0.2, model_path = ""):
         """
             Allow various clustering algorithm options for user to understand the base concept
         """
         if (training_or_testing == "training"):
             df = pd.read_csv(path + "/dataset_train.csv", low_memory=False)
+            ML_algorithm = MachineLearning(X=df, eps=eps, min_samples=min_samples, n_clusters=n_clusters, n_components=n_components, UOT=True, save_path=path)
+            data_frame, params, model_path  = getattr(ML_algorithm, str(method))()
+            get_chart = self.plot_chart(chart_type, data_frame, method, axis)
 
         else:
             df = pd.read_csv(path + "/dataset_test.csv", low_memory=False)
+            data_frame = MachineLearning.make_predictions(model_path, df)
         df.drop(columns=['Unnamed: 0'], inplace=True)
         # Select method to fill emptiness
 
-        ML_algorithm = MachineLearning(X=df, eps=eps, min_samples=min_samples, n_clusters=n_clusters, n_components=n_components, UOT=True, save_path=path)
-        data_frame, params, model_path  = getattr(ML_algorithm, str(method))()
-        get_chart = self.plot_chart(chart_type, data_frame, method, axis)
         response = {
             "header": tableHeader(data_frame.columns),
             "data": data_frame.to_dict('records'),
@@ -364,6 +366,10 @@ class UOT(Resource):
 
         return chart.to_dict()
     
+
+    def predict_test(self):
+        pass
+
 
     def plot_chart (self, chart_type, processed_df, ml_label, axis):
         try:

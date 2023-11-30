@@ -8,6 +8,8 @@ import math
 import numpy as np
 from bs4 import BeautifulSoup
 from flask import jsonify
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 from src.implementation.data.columns.remove_columns import not_needed_columns
 
 def convert_to_type(string_array):
@@ -510,3 +512,43 @@ def find_dict_with_value_in_nested_data(array_of_dicts, search_value):
             if inner_dict["value"] == search_value:
                 return data_dict
     return None
+
+
+
+def generate_color_palette(start_color, end_color, num_colors):
+    # Convert hex colors to RGB
+    start_rgb = mcolors.hex2color(start_color)
+    end_rgb = mcolors.hex2color(end_color)
+
+    # Create a list of RGB colors in the gradient
+    colors = []
+    for i in range(num_colors):
+        r = start_rgb[0] + (end_rgb[0] - start_rgb[0]) * (i / (num_colors - 1))
+        g = start_rgb[1] + (end_rgb[1] - start_rgb[1]) * (i / (num_colors - 1))
+        b = start_rgb[2] + (end_rgb[2] - start_rgb[2]) * (i / (num_colors - 1))
+        colors.append((r, g, b))
+
+    # Convert RGB colors back to hex
+    hex_colors = [mcolors.rgb2hex(color) for color in colors]
+
+    return hex_colors
+
+
+    # USAGE: # Define the start and end hex colors
+    # start_color = '#005EB8'  # Red
+    # end_color = '#B87200'    # Green
+
+    # # Generate a color palette with 10 colors
+    # num_colors = 5
+    # palette = generate_color_palette(start_color, end_color, num_colors)
+    # print(palette)
+    # # Display the color palette
+    # fig, ax = plt.subplots(figsize=(8, 2))
+    # cmap = mcolors.ListedColormap(palette)
+    # cax = ax.matshow([[i] for i in range(num_colors)], cmap=cmap)
+    # plt.xticks([])  # Hide x-axis labels
+    # plt.yticks([])  # Hide y-axis labels
+    # plt.show()
+
+    # # Print the hex colors in the palette
+    # print(palette)

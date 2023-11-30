@@ -4,6 +4,7 @@ from src.Admin.routes import admin_routes
 from src.Dashboard.routes import routes
 from src.User.routes import create_authentication_routes
 from src.UOT.routes import UOT_routes
+from src.Tutorial.routes import Tutorial_routes
 
 class RouteInitialization:
     def __init__(self):
@@ -30,6 +31,12 @@ class RouteInitialization:
                 "name": "UOT", 
                 "blueprint":  Blueprint('UOT', __name__, static_url_path="assets"), 
                 "register_callback": UOT_routes, 
+                "url_prefix": "/api/v1"
+            },
+            {
+                "name": "training", 
+                "blueprint":  Blueprint('Training', __name__, static_url_path="assets"), 
+                "register_callback": Tutorial_routes, 
                 "url_prefix": "/api/v1"
             },
         ]

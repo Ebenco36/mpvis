@@ -11,8 +11,8 @@ def graph_options(kit_id:int = 0):
     selection_avenue_default = ["click", "drag"]
     selection_type_default = ["multiple", "single", "interval"]
 
-    selection_avenue_default = transform_data_view(selection_avenue_default, 'selection_avenue_default', 'single')
-    selection_type_default = transform_data_view(selection_type_default, 'selection_type_default', 'single')
+    selection_avenue_default = transform_data_view(selection_avenue_default, 'selection_avenue', 'single', [], False)
+    selection_type_default = transform_data_view(selection_type_default, 'selection_type', 'single', [], False)
 
     return selection_avenue_default, selection_type_default
 
@@ -21,8 +21,7 @@ def graph_types_kit(kit_id:int=0):
     # Graph Dimension
     file_path_graph = 'src\implementation\graphs\helpers.py'
     graph_dimensions = filter_list(extract_function_names(file_path_graph), "_plot")
-
-    graph_types = transform_data_view(graph_dimensions, 'graph_types', 'single')
+    graph_types = transform_data_view(graph_dimensions, 'Chart_options', 'single')
     return graph_types
 
 def graph_combined_types_kit(kit_id:int=0):
@@ -30,17 +29,17 @@ def graph_combined_types_kit(kit_id:int=0):
     file_path_graph = 'src\implementation\graphs\helpers.py'
     graph_dimensions = filter_list(extract_function_names(file_path_graph), "_plot")
 
-    graph_types = transform_data_view(graph_dimensions, 'graph_types', 'single')
+    graph_types = transform_data_view(graph_dimensions, 'Combine_chart_options', 'single', [], False)
 
     return graph_types
 
 
 def machine_algorithms_helper_kit(kit_id:int=0):
     # ML algorithms
-    file_path_ml = 'src\implementation\Helpers\machine_learning_al\sklearnML.py'
+    file_path_ml = 'src/implementation/Helpers/machine_learning_al/UnsupervisedMachineLearning.py'
     ml_algorithms = filter_list(extract_function_names(file_path_ml), "_clustering")
 
-    ML_types = transform_data_view(ml_algorithms, 'ML_types', 'single')
+    ML_types = transform_data_view(ml_algorithms, 'Machine_learning_options', 'single')
 
     return ML_types
 
@@ -50,7 +49,7 @@ def missing_algorithms_helper_kit(kit_id:int=0):
     file_path_missing = 'src\implementation\Helpers\Regressors\index.py'
     missing_algorithms = filter_list(extract_function_names(file_path_missing), "_regressor")
 
-    Missing_types = transform_data_view(missing_algorithms, 'Missing_types', 'single')
+    Missing_types = transform_data_view(missing_algorithms, 'Data_augmentation_options', 'single', [], False)
 
     return Missing_types
 
@@ -59,7 +58,7 @@ def perc_of_missing_value_kit(kit_id:int = 0):
     # allowed percentage of missing values
     perc = [str(i) for i in range(10, 100, 10)]
 
-    perc_missing_value = transform_data_view(perc, 'perc_missing_value', 'single')
+    perc_missing_value = transform_data_view(perc, 'maintain_missing_values', 'single', [], False)
 
     return perc_missing_value
 
@@ -69,7 +68,7 @@ def dimensionality_reduction_algorithms_helper_kit(kit_id:int=0):
     file_path_dr = 'src\implementation\Helpers\machine_learning_al\dimensionality_reduction.py'
     dr_algorithms = filter_list(extract_function_names(file_path_dr), "_algorithm")
     
-    DR_types = transform_data_view(dr_algorithms, 'DR_types', 'single')
+    DR_types = transform_data_view(dr_algorithms, 'Dimensionality_reduction_options', 'single', [], False)
 
     return DR_types
 
@@ -79,7 +78,7 @@ def normalization_algorithms_helper_kit(kit_id:int=0):
     file_path_normal = 'src\implementation\Helpers\machine_learning_al\/normalization.py'
     normal_algorithms = filter_list(extract_function_names(file_path_normal), "_normalization")
 
-    normal_types = transform_data_view(normal_algorithms, 'normal_types', 'single')
+    normal_types = transform_data_view(normal_algorithms, 'Normalization_options', 'single', [], False)
 
     return normal_types
 
@@ -88,7 +87,7 @@ def normalization_algorithms_helper_kit(kit_id:int=0):
 def graph_selection_categories_UI_kit(kit_id:int=0):
     options=["Date Fields", "Descriptions"]
 
-    graph_selection_categories = transform_data_view(options, 'graph_selection_categories', 'single')
+    graph_selection_categories = transform_data_view(options, 'Chart_selection_category_options', 'single', [], False)
 
     return graph_selection_categories
 
@@ -99,7 +98,7 @@ def graph_group_by_date(kit_id:int = 0):
     # replace dot with underscore
     dates_data = tuple([str(s).replace('.', '_') for s in dates_data])
 
-    dates_types = transform_data_view(dates_data, 'dates_types', 'single')
+    dates_types = transform_data_view(dates_data, 'Date_options', 'single', [], False)
 
     return dates_types
 
@@ -109,7 +108,7 @@ def graph_group_by_others(kit_id:int = 0):
     # replace dot with underscore
     desc = tuple([str(s).replace('.', '_') for s in desc])
 
-    graph_group_by = transform_data_view(desc, 'graph_group_by', 'single')
+    graph_group_by = transform_data_view(desc, 'graph_group_by', 'single', [], False)
 
     return graph_group_by
 
@@ -117,7 +116,7 @@ def graph_group_by_others(kit_id:int = 0):
 def date_grouping_methods(kit_id:int = 0):
     classes_options=["By Year", "By Month"]
 
-    date_group_by = transform_data_view(classes_options, 'date_group_by', 'single')
+    date_group_by = transform_data_view(classes_options, 'Date_category_options', 'single', [], False)
     return date_group_by
 
 def grouping_aggregation_methods(kit_id:int = 0):
@@ -138,13 +137,15 @@ def grouping_aggregation_methods(kit_id:int = 0):
         "safe_name" : "name",
         "field_name": format_string_caps("aggregate_options"),
         "multiple": False,
+        "parents": [], 
+        "show_option": False
     }
     return aggregate_options
 
 
 def multi_select_kit(kit_id:int=0):
     select_options = ["single select", "multiple select"]
-    select_options_ = transform_data_view(select_options, 'select_options', 'single')
+    select_options_ = transform_data_view(select_options, 'multiple_select_options', 'single', [], False)
 
     return select_options_
 
@@ -152,19 +153,19 @@ def quantification_fields_kit(kit_id:int=0, selection_type:str = "single select"
     # Quantifications
     quantitative_data = cell_columns+rcsb_entries+quantitative_array_column
 
-    quantitative_attributes = transform_data_view(quantitative_data, 'quantitative_attributes', 'multiple')
+    quantitative_attributes = transform_data_view(quantitative_data, 'attribute_options', 'multiple', [], False)
 
     return quantitative_attributes
 
 def merge_graph_into_one_kit(kit_id:int=0):
     merge_graph_options = ["no", "yes"]
-    merge_graph_options = transform_data_view(merge_graph_options, 'merge_graph_option', 'single')
+    merge_graph_options = transform_data_view(merge_graph_options, 'merge_graph_option', 'single', [], False)
     return merge_graph_options
 
 
 def test_or_train_kit(kit_id:int=0):
     options = ["training", "testing"]
-    options = transform_data_view(options, 'train_test_option', 'single')
+    options = transform_data_view(options, 'train_or_test', 'single', [], False)
     return options
 
 def ml_slider_selector():
@@ -172,11 +173,24 @@ def ml_slider_selector():
         Select these option based on the ML selected
     """
     option_list = [str(i) for i in range(1, 11)]
-    eps_slider = transform_data_view([str(round(i, 2)) for i in np.arange(0.1, 10.0, 0.2)], "eps (epsilon)", "single")
-    pca_features_slider = transform_data_view(option_list, "pca_features", "single")
-    min_samples_slider = transform_data_view(option_list, "min_samples", "single")
-    n_clusters_slider = transform_data_view(option_list, "n_clusters", "single")
-    n_components_slider = transform_data_view(option_list, "n_components", "single")
+
+    eps_slider = transform_data_view([str(round(i, 2)) for i in np.arange(0.1, 10.0, 0.1)], "eps (epsilon)", "single", [
+        "dbscan_clustering"
+    ], False)
+
+    pca_features_slider = transform_data_view(option_list, "pca_options", "single", [], False)
+
+    min_samples_slider = transform_data_view(option_list, "min_samples_options", "single", [
+        "dbscan_clustering", "optics_clustering"
+    ], False)
+
+    n_clusters_slider = transform_data_view(option_list, "number_of_clusters", "single", [
+        'agglomerative_clustering', 'kMeans_clustering'
+    ], False)
+
+    n_components_slider = transform_data_view(option_list, "number_of_components", "single", [
+        'gaussian_clustering'
+    ], False)
 
     # date_group_by = transform_data_view(classes_options, 'date_group_by')
 
@@ -189,18 +203,18 @@ def dataSplitPercOption():
     end = 0.5
     step = 0.1  # Adjust the step size based on your preference
     numbers = [str(round(start + i * step, 1)) for i in range(int((end - start) / step) + 1)]
-    data = transform_data_view(numbers, 'data_split_perc_option', 'single')
+    data = transform_data_view(numbers, 'train_and_test_split_options', 'single', [], False)
 
     return data
 
 def PCAComponentsOption(n_features = 2):
     data = [str(i) for i in range(2, int(n_features)+1)]
-    data = transform_data_view(data, 'PCA_n_feature_option', 'single')
+    data = transform_data_view(data, 'number_of_PCA_components', 'single', [], False)
 
     return data
 
 
-def transform_data_view(data, unique_field_name, multiple_selection):
+def transform_data_view(data, unique_field_name, multiple_selection, parents:list = [], status = True):
     data_object = {
         "options": [{"value": value, "name": format_string_caps(replace_and_separate(value))} for value in data],
         "model_name": [],
@@ -208,6 +222,8 @@ def transform_data_view(data, unique_field_name, multiple_selection):
         "field_name": format_string_caps(unique_field_name),
         "multiple": True if multiple_selection == "multiple" else False,
         "tooltip": "",
+        "parents": parents,
+        "show_option": status
     }
 
     return data_object

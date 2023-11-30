@@ -2,6 +2,7 @@ import json
 import jwt
 import datetime
 from src.models.basemodel import db
+from sqlalchemy import or_
 from os import environ
 from src.User.helper import send_forgot_password_email
 from src.User.model import UserModel
@@ -13,7 +14,7 @@ from src.User.validation import (
     CreateSignupInputSchema, ResetPasswordInputSchema,
 )
 from src.utils.http_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
-
+from flask import current_app
 
 def create_user(request, input_data):
     """
@@ -60,9 +61,16 @@ def login_user(request, input_data):
     create_validation_schema = CreateLoginInputSchema()
     errors = create_validation_schema.validate(input_data)
     if errors:
+        current_app.logger.info(errors)
         return generate_response(message=errors)
 
-    get_user = UserModel.query.filter_by(email=input_data.get("email")).first()
+    email_or_username = input_data.get("email")
+    get_user = UserModel.query.filter_by(or_(
+        UserModel.email == email_or_username, 
+        UserModel.username == email_or_username
+        )).first()
+    current_app.logger.info(get_user)
+    current_app.logger.info(get_user.check_password(input_data.get("password")))
     if get_user is None:
         return generate_response(message="User not found", status=HTTP_400_BAD_REQUEST)
     if get_user.check_password(input_data.get("password")):
@@ -73,7 +81,7 @@ def login_user(request, input_data):
                 "username": get_user.username,
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
             },
-            environ.get("SECRET_KEY"),
+            environ.get("SECRET_KEY", "n9d3ud9n2un92n9h93fhf23h93fgfgf24f4f"),
         )
         input_data["token"] = token.decode()
         return generate_response(

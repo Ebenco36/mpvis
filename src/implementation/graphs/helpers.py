@@ -27,6 +27,8 @@ class Graph:
 
         # acceptable tags
         self.acceptable_encoding_tags = ["norminal", "temporal", "quantitative", "ordinal"]
+        self.start_color = '#005EB8'  # Start Color
+        self.end_color = '#B87200'    # End Color 
 
 
     def set_properties(self, axis:list = [], labels:str = "", selection_avenue_default:list = [], selection_type_default:list = []):
@@ -152,7 +154,7 @@ class Graph:
                 tooltip=tooltip_list,
                 # shape=self.encoded_x
             )
-
+        # This does not exist right now.
         elif(len(self.axis) == 3):
             """Possible we might encounter cases like this 3D"""
             self.altair_obj = self.altair_obj.encode(
@@ -213,13 +215,13 @@ class Graph:
         # Set the width and height of the chart
         self.altair_obj = self.altair_obj.properties(
             title=title,
-            # width=width,  # Set the width
+            width=width if width > 0 else "container",  # Set the width
             # height=height # set the height of the graph
         )
         return self
 
 
-    def config(self, label_font_size=12, title_font_size=14, font_size=16, font_weight='bold', conf='{"color": "#a855f7", "opacity": 0.9}'):
+    def config(self, label_font_size=12, title_font_size=14, font_size=16, font_weight='bold', conf='{"color": "#005EB8", "opacity": 0.9}'):
 
         self.altair_obj = self.altair_obj.configure_axis(
             labelFontSize=label_font_size,
@@ -258,7 +260,7 @@ class Graph:
 
         return combined_chart
     
-    def configure_mark(self, color='#a855f7', opacity=1):
+    def configure_mark(self, color='#005EB8', opacity=1):
         self.altair_obj = self.altair_obj.configure_mark(
             opacity=opacity,
             color= color
@@ -347,12 +349,15 @@ class Graph:
     
 
     @staticmethod
-    def plot_bar_chat(df, x_axis = "", conf={}):
+    def plot_bar_chat(df, x_axis = "", conf={}, width=0):
         # Create an Altair bar chart with sorting based on 'Value'
         return alt.Chart(df).mark_bar().encode(
             y=alt.X(x_axis+':N', sort="-x", title=format_string_caps(x_axis)),
             x=alt.Y('Values:Q'),
             tooltip=[alt.Tooltip(tooltip, title=format_string_caps(tooltip.capitalize())) for tooltip in [x_axis, 'Values']]
+        ).properties(
+            width=width if width > 0 else "container",
+            height=500 # set the height of the graph
         ).configure_mark(
             opacity= float(conf["opacity"]),
             color= conf["color"]

@@ -83,3 +83,35 @@ pip install -r requirements.txt (This will fix most of your issues. Especially w
 pip install --upgrade attrs
 
 
+conda activate jupyter_env
+
+C:\ProgramData\Anaconda3\Scripts\activate jupyter_env
+
+net use Y: \\sshfs.r\%awotoroe%@hpc-login01.rki.local\scratch\%USERNAME%
+
+net use /PERSISTENT:YES Y: \\sshfs.r\%awotoroe%@hpc-login02.rki.local\scratch\%awotoroe%
+
+pip install hdbscan
+
+Previous research and short information about myself...
+
+pip install missingno
+
+
+flask db init
+flask db migrate -m "initial migration"
+flask db upgrade
+
+https://learning.postman.com/docs/collections/using-newman-cli/installing-running-newman/#installing-newman
+C:\Users\awotoroe\AppData\Roaming\npm\newman run mycollection.json --proxy http://fw-bln.rki.local:8020 --proxy-auth awotoroe:TopeBimboife@32@36 --environment dev_env_postman.json
+
+$ newman run https://www.postman.com/collections/cb208e7e64056f5294e5 -e dev_environment.json
+
+HTTP_PROXY=http://your-proxy-url:port HTTPS_PROXY=http://your-proxy-url:port newman run your_collection.json
+
+
+set HTTP_PROXY=http://fw-bln.rki.local:8020
+set HTTPS_PROXY=http://fw-bln.rki.local:8020
+newman run your_collection.json
+
+curl -X POST http://127.0.0.1:8000/login 

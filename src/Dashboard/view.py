@@ -9,7 +9,7 @@ from src.implementation.Helpers.helper import summaryStatisticsConverter
 from src.Dashboard.data import stats_data
 from src.implementation.graphs.helpers import Graph
 from src.implementation.visualization import DataImport
-from src.implementation.Helpers.machine_learning_al.sklearnML import MachineLearning
+from src.implementation.Helpers.machine_learning_al.UnsupervisedMachineLearning import MachineLearning
 from src.implementation.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
 from src.implementation.data.columns.quantitative.quantitative import cell_columns, rcsb_entries
 from src.implementation.data.columns.quantitative.quantitative_array import quantitative_array_column
@@ -17,7 +17,7 @@ from src.implementation.Helpers.machine_learning_al.normalization import Normali
 from src.implementation.data.columns.norminal import descriptors
 from src.implementation.exceptions.AxisExceptions import AxisException
 from src.implementation.Helpers.helper import find_dict_with_value_in_nested_data
-from src.implementation.basic_plots import home_page_graph
+from src.implementation.basic_plots import home_page_graph, data_flow
 from src.implementation.Helpers.helper import tableHeader
 from src.middlewares.auth_middleware import token_required
 
@@ -38,7 +38,7 @@ class Dashboard(Resource):
         args = self.parser.parse_args()
         # Get the pagination parameters from the query string
         page = int(request.args.get('page', 1))
-        conf = request.args.get('chart_conf', '{"color": "#a855f7", "opacity": 0.9}')
+        conf = request.args.get('chart_conf', '{"color": "#005EB8", "opacity": 0.9}')
         conf = json.loads(conf)
         records_per_page = int(request.args.get('records_per_page', 10))
 
@@ -52,7 +52,8 @@ class Dashboard(Resource):
         df_summary = self.dataset.describe(include='all').fillna("").to_dict()
         # Combine the paginated data and the summary statistics into a single dictionary
         rows, columns = self.dataset.shape
-        trend = home_page_graph(conf)
+        # trend = home_page_graph(conf)
+        trend = data_flow(self.dataset)
         default_display = [
             "Group", 'Taxonomic Domain', 'citation_country', 'citation_year'
         ]
@@ -76,9 +77,10 @@ class Dashboard(Resource):
                 "name": "graph " + str(key),
                 "groups": key,
             }
+            # print(obj)
             group_graph_array.append(obj)
         # Sorting the list based group size
-        group_graph = sorted(group_graph.values(), key=lambda obj: len(obj))
+        # group_graph = sorted(group_graph.values(), key=lambda obj: obj)
         result = {
             'rows': rows,
             'columns': columns,
@@ -117,13 +119,13 @@ class SummaryStatistics(Resource):
         if (check_which_page == "stats-categories"):
             data = parent_data
         else:
-            conf = request.args.get('chart_conf', '{"color": "#a855f7", "opacity": 0.9}')
+            conf = request.args.get('chart_conf', '{"color": "#005EB8", "opacity": 0.9}')
             conf = json.loads(conf)
             group_graph, dataframe = self.pages.view_dashboard(group_field_selection, conf)
             merged_list = summary_search_filter_options
             sorted_frame = dataframe.sort_values(by='Values', ascending=False).to_dict('records')
             data = {
-                "group_dict"    : group_dict,
+                "group_dict"    : group_dict,\
                 "search_object" : merged_list,
                 "data"          : group_graph,
                 "headers"       : tableHeader(dataframe.columns),
@@ -140,7 +142,30 @@ class SummaryStatisticsLines(Resource):
         pass
 
     def get(self):
-        pass
+        check_which_page = request.args.get('stats-data', 'no_where')
+
+        group_field_selection = request.args.get('field_selection', 'Species')
+
+        parent_data, summary_search_filter_options, group_field_selection = summaryStatisticsConverter(group_field_selection)
+        group_dict = find_dict_with_value_in_nested_data(stats_data(), group_field_selection)
+        if (check_which_page == "stats-categories"):
+            data = parent_data
+        else:
+            conf = request.args.get('chart_conf', '{"color": "#005EB8", "opacity": 0.9}')
+            conf = json.loads(conf)
+            group_graph, dataframe = self.pages.view_dashboard(group_field_selection, conf)
+            merged_list = summary_search_filter_options
+            sorted_frame = dataframe.sort_values(by='Values', ascending=False).to_dict('records')
+            data = {
+                "group_dict"    : group_dict,\
+                "search_object" : merged_list,
+                "data"          : group_graph,
+                "headers"       : tableHeader(dataframe.columns),
+                "dataframe"     : sorted_frame,
+                "search_key"    : group_field_selection,
+                "status"        : 'success',
+            }
+        return jsonify(data)
 
 class UseCases(Resource):
     def __init__(self):

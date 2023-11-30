@@ -10,20 +10,12 @@ class UserModel(BaseModel):
     name = db.Column(db.String(80), nullable=False)
     username = db.Column(db.String(64), index=True, unique=True, nullable=False)
     phone = db.Column(db.String(15))
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=True)
     password = db.Column(db.String(255), nullable=False)
     status = db.Column(db.String(8), default=False, nullable=False)
     is_admin = db.Column(db.Boolean(), default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=True)
-
-    # def __init__(self, name, password, email, phone=None,  is_admin=False):
-    #     self.password = password
-    #     self.name = name
-    #     self.email = email
-    #     self.is_admin = is_admin
-    #     self.phone = phone
-    #     self.status = 'active'
 
     @classmethod
     def find_by_email(cls, email):
@@ -59,12 +51,12 @@ class UserModel(BaseModel):
         """
         return "<User {}>".format(self.username)
 
-    def hash_password(self):
+    def hash_password(self, password):
         """
         It takes the password that the user has entered, hashes it, and then stores the hashed password in
         the database
         """
-        self.password = generate_password_hash(self.password).decode("utf8")
+        self.password = generate_password_hash(password if password else self.password).decode("utf8")
 
     def check_password(self, password):
         """

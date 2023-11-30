@@ -1,4 +1,6 @@
 import pandas as pd
+import altair as alt
+import random
 from src.implementation.graphs.helpers import Graph
 from src.implementation.visualization import DataImport
 from src.implementation.Helpers.BasicClasses.GroupByClass import GroupBy
@@ -8,7 +10,8 @@ from src.implementation.exceptions.TagDoesnotExist import TagDoesnotExist
 from src.implementation.Helpers.machine_learning_al.normalization import Normalization
 from src.implementation.data.columns.quantitative.quantitative import cell_columns, rcsb_entries
 from src.implementation.data.columns.quantitative.quantitative_array import quantitative_array_column
-from src.implementation.Helpers.helper import extract_function_names, parser_change_dot_to_underscore
+from src.implementation.Helpers.helper import extract_function_names, parser_change_dot_to_underscore, \
+    generate_color_palette
 from src.implementation.Helpers.fields_helper import graph_options, graph_types_kit, \
     graph_selection_categories_UI_kit, \
     graph_group_by_date, graph_group_by_others, \
@@ -47,6 +50,39 @@ def home_page_graph(conf):
         # Display the chart in Streamlit
     return altair_graph_home_.return_dict_obj()
 
+
+def data_flow(protein_db):
+    d = pd.crosstab(df.bibliography_year, columns=df.Group).cumsum()
+
+    d = d.stack().reset_index()
+    d = d.rename(columns={0:'CummulativeCount'})
+    d = d.convert_dtypes()
+    # Define a custom color palette
+    start_color = '#005EB8'  # Red
+    end_color = '#B87200'    # Green
+
+    color_list = ['#93C4F6', '#005EB8', '#D9DE84', '#636B05']
+
+    # Generate a color palette with 10 colors
+    num_colors = len(list(df['Group'].unique()))
+    palette = generate_color_palette(start_color, end_color, num_colors)
+    random.shuffle(palette)
+
+    custom_palette = alt.Scale(domain=list(protein_db['Group'].unique()),
+                           range=color_list[:num_colors])
+    entries_over_time = alt.Chart(d).mark_bar(size=15).encode(
+        x=alt.X('bibliography_year:O', title="Year"),
+        y=alt.Y('CummulativeCount:Q', title = 'Entries'),
+        color=alt.Color('Group', scale=custom_palette, legend=alt.Legend(title="DB Type", labelLimit=0)),
+        tooltip=[alt.Tooltip('CummulativeCount:Q'),
+                alt.Tooltip('Group'),
+                alt.Tooltip('bibliography_year:O')]
+    ).configure_legend(orient='bottom').properties(
+        width="container",
+        height=400,
+        title="Database Entries Over Time"
+    ).to_dict()
+    return entries_over_time
 
 def create_UI_grouped_by():
     group_by = GroupBy(df)
