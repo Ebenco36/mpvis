@@ -49,4 +49,4 @@ This App was developed with the following stack:
 - Happy usage.
 
 ## Credits
-solnsumei@gmail.com
+ebenco94@gmail.com, georgeshattab@gmail.com
