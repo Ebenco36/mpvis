@@ -49,3 +49,9 @@ migrations/
 
 :project.sqlite
 :project.sssqlite
+
+.ipynb_checkpoints/
+__pycache__/
+.vscode/
+.mpvis/
+Jupyter/
