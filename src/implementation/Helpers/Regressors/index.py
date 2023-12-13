@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
 from sklearn.svm import SVR
-from fancyimpute import SoftImpute
 from src.implementation.data.columns.remove_columns import not_needed_columns
 from src.implementation.Helpers.helper import create_json_response, format_string_caps
-from sklearn.impute import SimpleImputer, KNNImputer, IterativeImputer
+from sklearn.impute import SimpleImputer, KNNImputer
 
 class Regressors:
 
@@ -47,16 +46,6 @@ class Regressors:
     # Random Forest
     def KNN_imputer_regressor(self):
         predicted_missing = self.run_regressor_algorithm(KNNImputer, n_neighbors=3)
-        return predicted_missing
-
-    # Decision Shift
-    def soft_imputer_regressor(self):
-        predicted_missing = self.run_regressor_algorithm(SoftImpute)
-        return predicted_missing
-
-    # Agglomerative Clustering
-    def iterative_imputer_regressor(self):
-        predicted_missing = self.run_regressor_algorithm(IterativeImputer, max_iter=10, random_state=0)
         return predicted_missing
 
     def simple_regressor(self):

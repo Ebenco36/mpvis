@@ -1,10 +1,12 @@
 from flask import Flask, Blueprint
 from flask_restful import Api
-from src.Admin.routes import admin_routes
 from src.Dashboard.routes import routes
 from src.User.routes import create_authentication_routes
 from src.UOT.routes import UOT_routes
-from src.Tutorial.routes import Tutorial_routes
+from src.Training.routes import training_routes
+from src.ClickManagement.routes import click_routes
+from src.Feedbacks.routes import feedback_routes
+from src.MP.routes import MP_routes
 
 class RouteInitialization:
     def __init__(self):
@@ -13,19 +15,13 @@ class RouteInitialization:
                 "name": "auth", 
                 "blueprint": Blueprint('auth', __name__, static_url_path="assets"), 
                 "register_callback": create_authentication_routes, 
-                "url_prefix": "/"
+                "url_prefix": "/api/v1"
             },
             {
                 "name": "bp", 
                 "blueprint": Blueprint('api', __name__, static_url_path="assets"), 
                 "register_callback": routes, 
                 "url_prefix": "/api/v1"
-            },
-            {
-                "name": "admin_bp", 
-                "blueprint":  Blueprint('admin', __name__, static_url_path="assets"), 
-                "register_callback": admin_routes, 
-                "url_prefix": "/api/v1/admin"
             },
             {
                 "name": "UOT", 
@@ -36,7 +32,24 @@ class RouteInitialization:
             {
                 "name": "training", 
                 "blueprint":  Blueprint('Training', __name__, static_url_path="assets"), 
-                "register_callback": Tutorial_routes, 
+                "register_callback": training_routes, 
+                "url_prefix": "/api/v1"
+            },
+            {
+                "name": "click_management", 
+                "blueprint":  Blueprint('Click', __name__, static_url_path="assets"), 
+                "register_callback": click_routes, 
+                "url_prefix": "/api/v1"
+            },
+            {
+                "name": "feedbacks", 
+                "blueprint":  Blueprint('Feedback', __name__, static_url_path="assets"), 
+                "register_callback": feedback_routes, 
+                "url_prefix": "/api/v1"
+            },{
+                "name": "MP_routes", 
+                "blueprint":  Blueprint('MP_routes', __name__, static_url_path="assets"), 
+                "register_callback": MP_routes, 
                 "url_prefix": "/api/v1"
             },
         ]
@@ -47,3 +60,4 @@ class RouteInitialization:
             init_route = Api(blueprint.get("blueprint"))
             blueprint.get("register_callback")(init_route)
             flask_app.register_blueprint(blueprint.get("blueprint"), url_prefix=blueprint.get("url_prefix"))
+

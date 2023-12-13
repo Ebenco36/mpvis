@@ -1,13 +1,23 @@
+import os
 import pandas as pd
 import urllib
+import requests
 import shutil
 import datetime
 import xml.etree.ElementTree as et
-from src.implementation.Helpers.helper import convert_month
 
 class MPSTRUCT:
 
+    def create_directory(self, directory_path):
+        try:
+            os.makedirs(directory_path)
+            print(f"Directory '{directory_path}' created successfully.")
+        except FileExistsError:
+            print(f"Directory '{directory_path}' already exists.")
+        
     def load_data(self):
+        # create directory
+        self.create_directory("datasets")
         #Fetch update timne of the database from the thml content of the mpstruc website
         req = urllib.request.urlopen("https://blanco.biomol.uci.edu/mpstruc/")
         page = req.read()
@@ -32,7 +42,7 @@ class MPSTRUCT:
         upd_hour =int(upd_times[4][0:2])
 
             
-        upd_month = convert_month(upd_month)
+        upd_month = self.convert_month(upd_month)
 
         #Introduce the update token for flexibility, so that it can easily be set to True if the database is to be updated without meeint the conditions
         update_token = True
@@ -46,16 +56,18 @@ class MPSTRUCT:
 
         current_date = datetime.date.today().strftime('%Y-%m-%d')
         if update_token:
-            with open("mpstrucTblXml.xml", "wb") as outfile:
+            with open("./datasets/mpstrucTblXml.xml", "wb") as outfile:
                 shutil.copyfileobj(new_mpstruc, outfile)
 
         return self
 
 
     def parse_data(self):
+        # create directory
+        self.create_directory("datasets")
         #Parse mpstruc xml received from 'Mpstuc Update' as an element tree
         current_date = datetime.date.today().strftime('%Y-%m-%d')
-        tree = et.parse("mpstrucTblXml.xml")
+        tree = et.parse("./datasets/mpstrucTblXml.xml")
         root = tree.getroot()
 
         #Start the long journey of generating the .csv-table
@@ -108,8 +120,46 @@ class MPSTRUCT:
                         
         data = pd.DataFrame(protein_entries, columns = ["Group","Subgroup","Pdb Code","Is Master Protein?","Name","Species","Taxonomic Domain","Expressed in Species","Resolution","Description","Bibliography","Secondary Bibliogrpahies","Related Pdb Entries","Member Proteins"])
         current_date = datetime.date.today().strftime('%Y-%m-%d')
-        data.to_csv("Mpstruck Data.csv")
+        data.to_csv("./datasets/Mpstruct_dataset.csv")
 
         #Save the unique Codes to know which proteins to fetch from the PDB
         mpstruck_ids = data["Pdb Code"]
-        mpstruck_ids.to_csv("mpstruck_ids.csv")
+        mpstruck_ids.to_csv("./datasets/mpstruct_ids.csv")
+        
+        
+    def fetch_data(self):
+        return self.load_data().parse_data()
+    
+    
+    def convert_month(self, mon):
+        if (mon == "Jan"):
+            return 1
+        if (mon == "Feb"):
+            return 2
+        if (mon == "Mar"):
+            return 3
+        if (mon == "Apr"):
+            return 4
+        if (mon == "May"):
+            return 5
+        if (mon == "Jun"):
+            return 6
+        if (mon == "Jul"):
+            return 7
+        if (mon == "Aug"):
+            return 8
+        if (mon == "Sep"):
+            return 9
+        if (mon == "Oct"):
+            return 10
+        if (mon == "Nov"):
+            return 11
+        if (mon == "Dec"):
+            return 12
+    
+
+    
+    
+# Instantiate the class and call the function
+mpstruct_obj = MPSTRUCT()
+mpstruct_obj.fetch_data()

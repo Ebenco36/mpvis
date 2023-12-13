@@ -17,6 +17,7 @@ def convert_to_type(string_array):
         if string_array and not pd.isna(string_array):
             # Convert string array to numeric array
             value = ast.literal_eval(string_array)
+            print(value)
         else:
             value = []
     except (Exception, ValueError, TypeError) as ex:
@@ -158,8 +159,8 @@ def convert_month(mon):
 
 
 #Strip the json strings and fix strings that would later become problematic (-> scottish names)
-def prepare_column(column_name):
-    table = pdb_table[column_name]
+def prepare_column(df, column_name):
+    table = df[column_name]
     table = table.replace(np.nan,"nan")
     ph = []
     for entry in table:
@@ -358,13 +359,14 @@ def generate_list_with_difference(num_elements, difference):
 
 # Custom function to convert string numbers to numeric values
 def convert_to_numeric_or_str(value):
-    try:
-        return int(value)
-    except ValueError:
+    if(value and value != " "):
         try:
-            return float(value)
-        except ValueError:
-            return value
+            return int(value)
+        except (ValueError, KeyError):
+            try:
+                return float(value)
+            except (ValueError, KeyError):
+                return value
         
 
 
@@ -439,6 +441,7 @@ def summaryStatisticsConverter(search_key):
 
     # Check if the name exists directly in the values
     for entry in data:
+        print(search_key +"=="+ entry['value'])
         if search_key == entry['value']:
             content_value = entry['value']
             found_key = content_value
@@ -552,3 +555,19 @@ def generate_color_palette(start_color, end_color, num_colors):
 
     # # Print the hex colors in the palette
     # print(palette)
+
+
+import ast
+def get_class_names(file_path):
+    class_names = []
+    with open(file_path, 'r') as file:
+        tree = ast.parse(file.read(), filename=file_path)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            class_names.append(node.name)
+
+    return class_names
+
+
+

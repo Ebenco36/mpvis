@@ -115,3 +115,293 @@ set HTTPS_PROXY=http://fw-bln.rki.local:8020
 newman run your_collection.json
 
 curl -X POST http://127.0.0.1:8000/login 
+
+
+python3 -m venv .mpvis
+
+
+ pip install --upgrade --force-reinstall -r requirements.txt
+
+
+
+
+Management Plugin enabled by default at http://localhost:15672
+
+To start rabbitmq now and restart at login:
+  brew services start rabbitmq
+Or, if you don't want/need a background service you can just run:
+  CONF_ENV_FILE="/opt/homebrew/etc/rabbitmq/rabbitmq-env.conf" /opt/homebrew/opt/rabbitmq/sbin/rabbitmq-server
+==> Summary
+🍺  /opt/homebrew/Cellar/rabbitmq/3.12.10: 1,442 files, 34.7MB
+==> Running `brew cleanup rabbitm
+Disable this behaviour by setting HOMEBREW_NO_INSTALL_CLEANUP.
+Hide these hints with HOMEBREW_NO_ENV_HINTS (see `man brew`).
+==> Caveats
+==> rabbitmq
+Management Plugin enabled by default at http://localhost:15672
+
+To start rabbitmq now and restart at login:
+  brew services start rabbitmq
+Or, if you don't want/need a background service you can just run:
+  CONF_ENV_FILE="/opt/homebrew/etc/rabbitmq/rabbitmq-env.conf" /opt/homebrew/opt/rabbitmq/sbin/rabbitmq-server
+
+Credentials
+  guest
+  guest
+
+
+
+set global innodb_file_format = `BARRACUDA`;
+set global innodb_large_prefix = `ON`;
+
+docker build -t mpvis .
+
+
+export LDFLAGS="-L/opt/homebrew/opt/mysql-client/lib"
+  export CPPFLAGS="-I/opt/homebrew/opt/mysql-client/include"
+
+  export MYSQLCLIENT_CFLAGS=`mysql_config --cflags`
+export MYSQLCLIENT_LDFLAGS=`mysql_config --libs`
+
+free memorz if there exist issues with space
+docker system prune -a
+
+
+
+install celery beat and celery using python package pip... What are the effectssssssssss...
+
+EDA for different methods used in MPstruct...
+
+
+flask db stamp head  # Set the current revision to the latest
+flask db migrate -m "Reset database"  # Create a new migration
+flask db upgrade  # Apply the migration
+
+
+docker-compose up --build -d
+
+
+sqlalchemy.exc.InvalidRequestError: Implicitly combining column membrane_proteins.group with column membrane_proteins.group under attribute 'group'.  Please configure one or more attributes for these same-named columns explicitly.
+(.mpvis) AwotoroE-Dev@MBPvonEbenezer mpvis % 
+
+
+flask db migrate -m "Your migration message" --directory src/MP
+
+
+snakemake -j 4 --dry-run
+
+ERROR: Could not find a version that satisfies the requirement snakemake==6.7.1 
+(from versions: 1.0, 1.0.1, 1.0.2, 1.1, 1.1.1, 1.1.2, 1.1.3, 1.1.4, 1.2, 1.2.1, 1.2.3, 2.0, 2.1, 2.1.1, 2.2, 2.2.1, 2.2.2, 2.3, 2.4, 2.4.1, 2.4.2, 2.4.3, 2.4.4, 
+2.4.5, 2.4.6, 2.4.7, 2.4.7.1, 2.4.8, 2.4.9, 2.5, 2.5.1, 2.5.2, 2.5.2.1, 2.5.2.2, 3.0b1, 3.0, 3.1, 3.1.1, 3.2, 3.2.1, 3.2.2, 3.3, 3.4, 3.4.1, 3.4.2, 3.5.0, 3.5.1, 3.5.2, 
+3.5.3, 3.5.4, 3.5.5, 3.6.0, 3.6.1, 3.7.0, 3.7.1, 3.8.0, 3.8.1, 3.8.2, 3.9.0, 3.9.1, 3.10.0, 3.10.1, 3.10.2, 3.11.0, 3.11.1, 3.11.2, 3.12.0, 3.13.0, 3.13.1, 3.13.2, 3.13.3, 
+4.0.0, 4.1.0, 4.2.0, 4.3.0, 4.3.1, 4.4.0, 4.5.0, 4.5.1, 4.6.0, 4.7.0, 4.8.0, 4.8.1, 5.0.0, 5.1.1, 5.1.2, 5.1.3, 5.1.4, 5.1.5, 5.2.0, 5.2.1, 5.2.2, 5.2.3, 5.2.4, 5.3.0, 
+5.3.1, 5.4.0, 5.4.1, 5.4.2, 5.4.3, 5.4.4, 5.4.5, 5.5.0, 5.5.1, 5.5.2, 5.5.3, 5.5.4, 5.6.0, 5.7.0, 5.7.1, 5.7.4, 5.8.0, 5.8.1, 5.8.2, 5.9.0, 5.9.1, 5.10.0, 5.11.0, 
+5.11.1, 5.11.2, 5.12.0, 5.12.1, 5.12.2, 5.12.3, 5.13.0, 5.14.0, 5.15.0, 5.16.0, 5.17.0, 5.18.0, 5.18.1, 5.19.0, 5.19.1, 5.19.2, 5.19.3, 5.20.0, 5.20.1, 5.21.0, 5.22.0, 
+5.22.1, 5.23.0, 5.24.0, 5.24.1, 5.24.2, 5.25.0, 5.26.0, 5.26.1, 5.27.2, 5.27.3, 5.27.4, 5.28.0, 5.29.0, 5.30.0, 5.30.1, 5.30.2, 5.31.0, 5.31.1, 5.32.0, 5.32.1, 5.32.2, 
+6.0.0, 6.0.1, 6.0.2, 6.0.3, 6.0.4, 6.0.5, 6.1.0, 6.1.1, 6.1.2, 6.2.0, 6.2.1, 6.3.0, 6.4.0, 6.4.1, 6.5.0, 6.5.1, 6.5.2, 6.5.3, 6.5.5, 6.6.0, 6.6.1, 6.7.0, 6.8.0, 6.8.1, 
+6.8.2, 6.9.0, 6.9.1, 6.10.0, 6.11.0, 6.11.1, 6.12.0, 6.12.1, 6.12.2, 6.12.3, 6.13.0, 6.13.1, 6.14.0, 6.15.0, 6.15.1, 6.15.2, 6.15.3, 6.15.4, 6.15.5, 7.0.0, 7.0.1, 
+7.0.2, 7.0.3, 7.0.4, 7.1.0, 7.1.1, 7.2.0, 7.2.1, 7.3.0, 7.3.1, 7.3.2, 7.3.3, 7.3.4, 7.3.5, 7.3.6, 7.3.7, 7.3.8, 7.4.0, 7.5.0, 7.6.0, 7.6.1, 7.6.2, 7.7.0, 7.8.0, 
+7.8.1, 7.8.2, 7.8.3, 7.8.5, 7.9.0, 7.10.0, 7.11.0, 7.12.0, 7.12.1, 7.13.0, 7.14.0, 7.14.1, 7.14.2, 7.15.0, 7.15.1, 7.15.2, 7.16.0, 7.16.1, 7.16.2, 7.17.0, 7.17.1, 
+7.18.0, 7.18.1, 7.18.2, 7.19.0, 7.19.1, 7.20.0, 7.21.0, 7.22.0, 7.23.0, 7.23.1, 7.24.0, 7.24.1, 7.24.2, 7.25.0, 7.25.1, 7.25.2, 7.25.3, 7.25.4, 7.26.0, 7.28.0, 
+7.28.1, 7.28.2, 7.28.3, 7.29.0, 7.30.0, 7.30.1, 7.30.2, 7.31.0, 7.31.1, 7.32.0, 7.32.1, 7.32.2, 7.32.3, 7.32.4)
+
+
+Problemmatic
+
+Each of these code are not available on RCSB (https://www.rcsb.org/structure/removed/3CJU).
+
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5W7L  Replaced by 8G1N
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5G1J  Replaced by 7PDC
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3WXV  Replaced by 6KS0
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3J8E  Replaced by 5TB0
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3HGC  Replaced by 4NYK
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4UPC  Replaced by 5A63
+
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/7UUV  Not found anywhere
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/6AN7  Replaced by 6OIH
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5TSI  Replaced by 5UAR
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4J05  Replaced by 7SP5
+
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3B8C  5KSD
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4P6V  8ACY
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/1FUM  1L0V
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/7ROW  Not found anywhere
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3BZ1  4V62
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3ARC  3WU2
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3CJU  3EGV
+
+
+Meeting Summary
+
+
+Project break down is as follows.
+
+Meeting date:
+Attendance:
+  1. Georges Hattab
+  2. Ebenezer Awotoro
+
+
+We came up with venn diagram to describe things we are looking forward to. The venn diagram was created to 
+illustrate the relationship or enrichment between Mpstruc (Membrane Protein Strucuture) and PDB (Protein Data Bank) 
+can be a useful visualization for understanding the overlap and differences between these two datasets. 
+A Venn diagram is a set diagram that shows the overlap of sets, representing the common elements and unique elements in different datasets.
+
+Here's a description of a hypothetical Venn diagram for Mpstruc and PDB enrichment:
+
+Mpstruc Set (A):
+=============
+Circle A in the Venn diagram represents the set of membrane proteins from Mpstruc.
+Label the circle as "Mpstruc."
+This circle includes all membrane proteins obtained from the Mpstruc database.
+
+PDB Set (B):
+=============
+Circle B in the Venn diagram represents the set of all proteins from the PDB.
+Label the circle as "PDB."
+This circle includes all proteins available in the Protein Data Bank.
+
+Overlap (AB):
+=========
+The overlapping region between circles A and B represents the membrane proteins that are present in both Mpstruc and PDB.
+Label the overlapping region with "Common Membrane Proteins."
+
+Unique Regions:
+
+The non-overlapping region in circle A represents membrane proteins unique to Mpstruc (not present in PDB).
+We labeled this region as "Unique to Mpstruc."
+The non-overlapping region in circle B represents proteins in PDB that are not membrane proteins.
+We also labeled this region as "Non-membrane Proteins in PDB."
+
+Interpretation:
+
+If the overlap between Mpstruc and PDB is significant, it indicates a substantial number of membrane proteins that are shared between the two datasets.
+If the unique region in Mpstruc is substantial, it suggests that Mpstruc contains membrane proteins that might not be present in PDB, highlighting its specificity to membrane proteins.
+If the unique region in PDB is significant, it indicates proteins in PDB that are not membrane proteins.
+This visual representation provides a quick overview of the relationship between membrane proteins in Mpstruc and all proteins in PDB. Adjustments can be made based on the actual datasets and specific criteria for membrane proteins in your analysis.
+
+
+
+
+Development Stages Overview:
+
+Stage 1:
+----------------
+Focus:Only MPstruct (analysis and visualization)
+Example:
+Tree diagrams
+Visuals
+
+
+Stage 2:
+----------------
+Focus: Only enriched MPstruct data (exclude MPstruct)
+Example:
+Generate summary statistics
+Include relevant visualizations
+
+
+Stage 3:
+----------------
+Focus: Integration of both curated MPstruct and enriched data.
+  Tasks:
+    1. Analyze and visualize data with respect to resolution methods.
+    2. Also consider overlap with respect to methods
+    3. Validate new/unclassified MP structures through clustering.
+    4. Outlier detection.
+    5. still counting...
+
+Data separation based on methods used for protein resolution before analysis.
+
+
+Recent Updates:
+
+=====================
+Issue Discovery:
+
+Two membrane proteins listed on MPstruct cannot be found anywhere, including PDB.
+Example: Entries with codes 7ROW and 7UUV are not found in the RCSB database.
+
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/7ROW  Not found anywhere (Including PDB)
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/7UUV  Not found anywhere (Including PDB)
+
+
+Problematic Entries:
+
+Certain codes in MPstruct have been updated on PDB, causing discrepancies.
+Example: Entries like 5W7L have been replaced by new codes like 8G1N.
+
+Each of these code are not available on RCSB (https://www.rcsb.org/structure/removed/3CJU). 
+
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5W7L  Replaced by 8G1N
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5G1J  Replaced by 7PDC
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3WXV  Replaced by 6KS0
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3J8E  Replaced by 5TB0
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3HGC  Replaced by 4NYK
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4UPC  Replaced by 5A63
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/6AN7  Replaced by 6OIH
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5TSI  Replaced by 5UAR
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4J05  Replaced by 7SP5
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3B8C  Replaced by 5KSD
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4P6V  Replaced by 8ACY
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/1FUM  Replaced by 1L0V
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3BZ1  Replaced by 4V62
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3ARC  Replaced by 3WU2
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3CJU  Replaced by 3EGV
+
+Action Items:
+
+Investigate discrepancies between MPstruct and PDB entries.
+Update problematic entries with the correct replacements.
+
+
+
+
+
+
+
+
+
+
+Recent update from my end:
+================================
+
+Two membrane proteins that were listed on MPstruct are nowhere to be found, I discovered while I was attempting to extract updates from the file again. for example:
+
+
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/7ROW  Not found anywhere (Including PDB)
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/7UUV  Not found anywhere (Including PDB)
+
+The slightly problematic ones have already had their codes updated on PDB, however MPstruct retains the original protein code. Example 
+
+Problemmatic
+======================
+Each of these code are not available on RCSB (https://www.rcsb.org/structure/removed/3CJU). 
+
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5W7L  Replaced by 8G1N
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5G1J  Replaced by 7PDC
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3WXV  Replaced by 6KS0
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3J8E  Replaced by 5TB0
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3HGC  Replaced by 4NYK
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4UPC  Replaced by 5A63
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/6AN7  Replaced by 6OIH
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/5TSI  Replaced by 5UAR
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4J05  Replaced by 7SP5
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3B8C  Replaced by 5KSD
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/4P6V  Replaced by 8ACY
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/1FUM  Replaced by 1L0V
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3BZ1  Replaced by 4V62
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3ARC  Replaced by 3WU2
+There is an issue with : https://data.rcsb.org/rest/v1/core/entry/3CJU  Replaced by 3EGV
+
+
+
+
+https://rki.webex.com/rki/j.php?MTID=m36ad237a20b584c56c68487adf4f1dc0
+
+docker tag mpvis-flask-app ebenco36/mtest_docker:latest
+
+docker push ebenco36/mtest_docker:latest
+
+# Pull the image from the repository
+docker pull ebenco36/mtest_docker:latest

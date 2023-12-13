@@ -1,8 +1,6 @@
 from flask_restful import Resource, reqparse
-from werkzeug.security import safe_str_cmp
+from src.Dashboard.services import get_items, get_table_as_dataframe
 from src.implementation.pages import Pages
-from src.User.model import UserModel
-from src.models.schemas.user import UserSchema, user_summary
 import json
 from flask import jsonify, request
 from src.implementation.Helpers.helper import summaryStatisticsConverter
@@ -21,43 +19,27 @@ from src.implementation.basic_plots import home_page_graph, data_flow
 from src.implementation.Helpers.helper import tableHeader
 from src.middlewares.auth_middleware import token_required
 
-user_schema = UserSchema()
-
-
 class Dashboard(Resource):
     def __init__(self):
-        data_import = DataImport()
-        self.dataset = data_import.loadFile()
-        self.pages = Pages(self.dataset)
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument('param', type=str, help='Sample parameter')
+        pass
 
     # @staticmethod
-    # @token_required
+    @token_required
     def get(self):
-        args = self.parser.parse_args()
-        # Get the pagination parameters from the query string
-        page = int(request.args.get('page', 1))
+        
+        # Get the DataFrame directly
+        table_df = get_table_as_dataframe("membrane_proteins")
+        pages = Pages(table_df)
+        data = get_items(request)
+        
         conf = request.args.get('chart_conf', '{"color": "#005EB8", "opacity": 0.9}')
         conf = json.loads(conf)
-        records_per_page = int(request.args.get('records_per_page', 10))
-
-        # Calculate the start and end index for slicing the DataFrame
-        start_idx = (page - 1) * records_per_page
-        end_idx = start_idx + records_per_page
-
-        # Slice the DataFrame based on the pagination parameters
-        paginated_df = self.dataset[start_idx:end_idx].fillna("").to_dict('records')
-        # Generate the DataFrame summary statistics
-        df_summary = self.dataset.describe(include='all').fillna("").to_dict()
-        # Combine the paginated data and the summary statistics into a single dictionary
-        rows, columns = self.dataset.shape
         # trend = home_page_graph(conf)
-        trend = data_flow(self.dataset)
+        trend = data_flow(table_df)
         default_display = [
-            "Group", 'Taxonomic Domain', 'citation_country', 'citation_year'
+            "group", 'taxonomic_domain', 'citation_country'
         ]
-        request_for_group = request.args.get('group_key', 'Taxonomic Domain')
+        request_for_group = request.args.get('group_key', 'taxonomic_domain')
         # Split the string on commas to create a list
         request_for_group_list = request_for_group.split(',')
 
@@ -70,31 +52,26 @@ class Dashboard(Resource):
         group_graph_array = []
 
         for (key, graph) in enumerate(unique_group_list):
-            group_graph, _ = self.pages.view_dashboard(graph, conf)
+            group_graph, _ = pages.view_dashboard(graph, conf)
             obj = {
                 "chart_obj": group_graph,
                 "id": "graph" + str(key),
                 "name": "graph " + str(key),
-                "groups": key,
+                "groups": graph,
             }
-            # print(obj)
+            
             group_graph_array.append(obj)
         # Sorting the list based group size
         # group_graph = sorted(group_graph.values(), key=lambda obj: obj)
         result = {
-            'rows': rows,
-            'columns': columns,
-            'summary': df_summary,
-            'data': paginated_df,
+            'data': data,
             'group_graph_array': group_graph_array,
             'trend': trend
         }
 
-        # Return the result as JSON using Flask's jsonify function
         return jsonify(result)
     
     @staticmethod
-    # @UserSchema.validate_fields(location=('json',))
     def post(self, args):
         return {
             'success': True,
@@ -102,26 +79,25 @@ class Dashboard(Resource):
 
 
 class SummaryStatistics(Resource):
-
-    def __init__(self):
-        data_import = DataImport()
-        self.dataset = data_import.loadFile()
-        self.pages = Pages(self.dataset)
-
-    # @token_required
+    @token_required
     def get(self):
+        # Get the DataFrame directly
+        table_df = get_table_as_dataframe("membrane_proteins")
+        pages = Pages(table_df)
+        
         check_which_page = request.args.get('stats-data', 'no_where')
-
-        group_field_selection = request.args.get('field_selection', 'Species')
-
+        group_field_selection = request.args.get('field_selection', 'species')
+        
         parent_data, summary_search_filter_options, group_field_selection = summaryStatisticsConverter(group_field_selection)
         group_dict = find_dict_with_value_in_nested_data(stats_data(), group_field_selection)
+
         if (check_which_page == "stats-categories"):
             data = parent_data
         else:
             conf = request.args.get('chart_conf', '{"color": "#005EB8", "opacity": 0.9}')
             conf = json.loads(conf)
-            group_graph, dataframe = self.pages.view_dashboard(group_field_selection, conf)
+            print(request.args.get('field_selection', 'species'))
+            group_graph, dataframe = pages.view_dashboard(group_field_selection, conf)
             merged_list = summary_search_filter_options
             sorted_frame = dataframe.sort_values(by='Values', ascending=False).to_dict('records')
             data = {
@@ -144,7 +120,7 @@ class SummaryStatisticsLines(Resource):
     def get(self):
         check_which_page = request.args.get('stats-data', 'no_where')
 
-        group_field_selection = request.args.get('field_selection', 'Species')
+        group_field_selection = request.args.get('field_selection', 'species')
 
         parent_data, summary_search_filter_options, group_field_selection = summaryStatisticsConverter(group_field_selection)
         group_dict = find_dict_with_value_in_nested_data(stats_data(), group_field_selection)

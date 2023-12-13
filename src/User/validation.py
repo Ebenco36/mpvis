@@ -26,7 +26,17 @@ class CreateSignupInputSchema(Schema):
 # library. The Field class is a class that validates values
 class CreateLoginInputSchema(Schema):
     # the 'required' argument ensures the field exists
-    email = fields.Email(required=True)
+    # email = fields.Email(required=True)
+    email = fields.Str(
+        required=True,
+        validate=[
+            validate.Length(min=3, error="Username must be at least 3 characters long"),
+            validate.Regexp(
+                r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)|^[a-zA-Z0-9_.+-]+$",
+                error="Invalid username or email format",
+            ),
+        ],
+    )
     password = fields.Str(required=True, validate=validate.Length(min=6))
 
 

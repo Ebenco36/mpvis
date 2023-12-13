@@ -68,7 +68,7 @@ def data_flow(protein_db):
     palette = generate_color_palette(start_color, end_color, num_colors)
     random.shuffle(palette)
 
-    custom_palette = alt.Scale(domain=list(protein_db['Group'].unique()),
+    custom_palette = alt.Scale(domain=list(protein_db['group'].unique()),
                            range=color_list[:num_colors])
     entries_over_time = alt.Chart(d).mark_bar(size=15).encode(
         x=alt.X('bibliography_year:O', title="Year"),

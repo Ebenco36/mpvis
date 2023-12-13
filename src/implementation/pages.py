@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+from utils.general import shorten_column_name
 from src.implementation.Helpers.EDA.EDA import EDA
 from src.implementation.graphs.helpers import Graph
 from src.implementation.visualization import DataImport
@@ -30,21 +31,24 @@ class Pages:
         grouped_data.columns = [group_by_column, "Values"]
 
         return grouped_data, group_by_column
-
-    def dashboard_helper_exemption(self, group_by_column = 'Resolution', range_name="range_value", range_resolution_meters=0.2):
-        if ( not '*' in group_by_column):
+    
+    def dashboard_helper_exemption(self, group_by_column = 'resolution', range_name="range_value", range_resolution_meters=0.2):
+        
+        group_by_column = shorten_column_name(group_by_column)
+        
+        if ( not '*' in group_by_column and group_by_column != ""):
             # Apply the custom function to 'Column1'
             self.data[group_by_column] = self.data[group_by_column].apply(convert_to_numeric_or_str)
 
             # Convert string list to list
-            self.data['rcsb_entry_info_software_programs_combined'] = self.data['rcsb_entry_info_software_programs_combined'].apply(lambda x: convert_to_type(x))
-
+            self.data['rcsentinfo_software_programs_combined'] = self.data['rcsentinfo_software_programs_combined'].apply(lambda x: convert_to_type(x))
+            
             # Separate string column
             mask_str = self.data[group_by_column].apply(lambda x: isinstance(x, str))
             df_numeric = self.data[~mask_str]
             df_str = self.data[mask_str]
             max_value = df_numeric[group_by_column].max(skipna=True)
-            if(not df_numeric.empty and not pd.isna(max_value) and group_by_column != "rcsb_entry_info_software_programs_combined"):
+            if(not df_numeric.empty and not pd.isna(max_value) and group_by_column != "rcsentinfo_software_programs_combined"):
                 # Convert 'selected column' column to numeric values in the numeric DataFrame
                 df_numeric[group_by_column] = pd.to_numeric(df_numeric[group_by_column], errors='coerce')
 
@@ -131,7 +135,7 @@ class Pages:
         # sort records and get the first 20
         sorted_df = df_.sort_values(by='Values', ascending=False).head(20)
     
-        chart_obj = Graph.plot_bar_chat(sorted_df, pivot_col_, conf).to_dict()
+        chart_obj = Graph.plot_bar_chart(sorted_df, pivot_col_, conf).to_dict()
         return chart_obj, df_
 
     def EDA_view(self, selected_chunk_perc=10, selected_columns_to_vis:list=[]):

@@ -1,8 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from slugify import slugify
 from datetime import datetime
-
-db = SQLAlchemy()
+from database.db import db
 
 
 class BaseModel(db.Model):

@@ -1,12 +1,12 @@
-from passlib.hash import bcrypt_sha256 as sha256
-from src.models.basemodel import BaseModel, db
 import datetime
+from database.db import db
+from passlib.hash import bcrypt_sha256 as sha256
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 
-class UserModel(BaseModel):
+class UserModel(db.Model):
     __tablename__ = "users"
-
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(80), nullable=False)
     username = db.Column(db.String(64), index=True, unique=True, nullable=False)
     phone = db.Column(db.String(15))

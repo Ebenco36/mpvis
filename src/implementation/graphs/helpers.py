@@ -346,19 +346,27 @@ class Graph:
 
         # Display the combined plot
         return combined_plot
-    
 
     @staticmethod
-    def plot_bar_chat(df, x_axis = "", conf={}, width=0):
-        # Create an Altair bar chart with sorting based on 'Value'
-        return alt.Chart(df).mark_bar().encode(
-            y=alt.X(x_axis+':N', sort="-x", title=format_string_caps(x_axis)),
-            x=alt.Y('Values:Q'),
+    def plot_bar_chart(df, x_axis="", conf={}, width=0):
+        # Create an Altair bar chart with sorting based on 'Values'
+        x_axis_acronym = acronym(x_axis)  # Replace with your actual acronym function
+        chart = alt.Chart(df).mark_bar().encode(
+            x=alt.X(f'{x_axis}:N', sort="-y", title=x_axis_acronym),
+            y=alt.Y('Values:Q'),
+            color=alt.Color(f'{x_axis}:N', legend=alt.Legend(title=format_string_caps(x_axis))),
             tooltip=[alt.Tooltip(tooltip, title=format_string_caps(tooltip.capitalize())) for tooltip in [x_axis, 'Values']]
         ).properties(
             width=width if width > 0 else "container",
-            height=500 # set the height of the graph
-        ).configure_mark(
-            opacity= float(conf["opacity"]),
-            color= conf["color"]
+        ).configure_legend(orient='bottom').configure_mark(
+            opacity=float(conf["opacity"]),
+            color=conf["color"]
         )
+        
+        return chart
+    
+    
+def acronym(input_string):
+    words = input_string.split()
+    acronym = ''.join(word[0].upper() for word in words)
+    return acronym

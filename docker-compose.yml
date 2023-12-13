@@ -1,0 +1,86 @@
+version: '3.9'
+
+services:
+  flask-app:
+    container_name: mpvis_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${FLASK_RUN_PORT}:5000"
+    depends_on:
+      - postgres
+      - celery
+    env_file:
+      - .env
+    # volumes:
+    #   - flask-app-data:/app/data
+    networks:
+      - app-networks
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: mpvis_db
+      POSTGRES_USER: mpvis_user
+      POSTGRES_PASSWORD: mpvis_user
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file: 
+      - .env
+    networks:
+      - app-networks
+
+  celery:
+    image: celery:latest
+    container_name: mpvis_celery
+    # Adjust Celery configuration as needed
+    environment:
+      - BROKER_URL=pyamqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=db+postgresql://${DB_USER}:${DB_PASSWORD}@postgresql/${DB_NAME}
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - app-networks
+
+  rabbitmq:
+    container_name: mpvis_rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq/
+    networks:
+      - app-networks
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - app-networks
+
+# shared network
+networks:
+  app-networks:
+    driver: bridge
+
+
+volumes:
+  flask-app-data:
+  mysql-data:
+  rabbitmq-data:
+  pgdata:
