@@ -1,4 +1,0 @@
-
-class AxisException(Exception):
-    pass
-

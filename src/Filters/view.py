@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 from flask import jsonify, request
-from src.implementation.Helpers.fields_helper import date_grouping_methods, \
+from src.services.Helpers.fields_helper import date_grouping_methods, \
     dimensionality_reduction_algorithms_helper_kit, graph_group_by_date, \
     graph_group_by_others, graph_options, graph_selection_categories_UI_kit, \
     graph_types_kit, grouping_aggregation_methods, machine_algorithms_helper_kit, \

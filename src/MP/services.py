@@ -4,8 +4,8 @@ from src.Dashboard.services import get_table_as_dataframe, get_table_as_datafram
 
 class DataService:
     @staticmethod
-    def get_data_by_column_search(column_name="rcsentinfo_experimental_method", value="X-ray"):
-        data = get_table_as_dataframe_exception("membrane_proteins", column_name, value)
+    def get_data_by_column_search(column_name="rcsentinfo_experimental_method", value="X-ray", page=1, per_page=10):
+        data = get_table_as_dataframe_exception("membrane_proteins", column_name, value, page, per_page)
         return data
     
     @staticmethod

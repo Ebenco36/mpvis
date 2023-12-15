@@ -1,0 +1,78 @@
+version: '3.9'
+
+services:
+  flask-app:
+    container_name: mpvis_app
+    image: ebenco36/mpvis:latest
+    ports:
+      - "80:5000"
+    depends_on:
+      - postgres
+      - celery
+    env_file:
+      - .env
+    networks:
+      - app-networks
+
+  postgres:
+    image: ebenco36/mpvis_postgres:latest
+    environment:
+      POSTGRES_DB: mpvis_db
+      POSTGRES_USER: mpvis_user
+      POSTGRES_PASSWORD: mpvis_user
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file: 
+      - .env
+    networks:
+      - app-networks
+
+  celery:
+    image: ebenco36/mpvis_celery:latest
+    container_name: mpvis_celery
+    environment:
+      - BROKER_URL=pyamqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=db+postgresql://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - app-networks
+
+  rabbitmq:
+    container_name: mpvis_rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq/
+    networks:
+      - app-networks
+
+  pgadmin:
+    image: ebenco36/mpvis_pgadmin:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - app-networks
+
+# shared network
+networks:
+  app-networks:
+    driver: bridge
+
+volumes:
+  pgdata:
+  rabbitmq-data:

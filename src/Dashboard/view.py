@@ -1,22 +1,22 @@
 from flask_restful import Resource, reqparse
 from src.Dashboard.services import get_items, get_table_as_dataframe
-from src.implementation.pages import Pages
+from src.services.pages import Pages
 import json
 from flask import jsonify, request
-from src.implementation.Helpers.helper import summaryStatisticsConverter
+from src.services.Helpers.helper import summaryStatisticsConverter
 from src.Dashboard.data import stats_data
-from src.implementation.graphs.helpers import Graph
-from src.implementation.visualization import DataImport
-from src.implementation.Helpers.machine_learning_al.UnsupervisedMachineLearning import MachineLearning
-from src.implementation.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
-from src.implementation.data.columns.quantitative.quantitative import cell_columns, rcsb_entries
-from src.implementation.data.columns.quantitative.quantitative_array import quantitative_array_column
-from src.implementation.Helpers.machine_learning_al.normalization import Normalization
-from src.implementation.data.columns.norminal import descriptors
-from src.implementation.exceptions.AxisExceptions import AxisException
-from src.implementation.Helpers.helper import find_dict_with_value_in_nested_data
-from src.implementation.basic_plots import home_page_graph, data_flow
-from src.implementation.Helpers.helper import tableHeader
+from src.services.graphs.helpers import Graph
+from src.services.visualization import DataImport
+from src.services.Helpers.machine_learning_al.UnsupervisedMachineLearning import MachineLearning
+from src.services.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
+from src.services.data.columns.quantitative.quantitative import cell_columns, rcsb_entries
+from src.services.data.columns.quantitative.quantitative_array import quantitative_array_column
+from src.services.Helpers.machine_learning_al.normalization import Normalization
+from src.services.data.columns.norminal import descriptors
+from src.services.exceptions.AxisExceptions import AxisException
+from src.services.Helpers.helper import find_dict_with_value_in_nested_data
+from src.services.basic_plots import home_page_graph, data_flow
+from src.services.Helpers.helper import tableHeader
 from src.middlewares.auth_middleware import token_required
 
 class Dashboard(Resource):
@@ -96,7 +96,6 @@ class SummaryStatistics(Resource):
         else:
             conf = request.args.get('chart_conf', '{"color": "#005EB8", "opacity": 0.9}')
             conf = json.loads(conf)
-            print(request.args.get('field_selection', 'species'))
             group_graph, dataframe = pages.view_dashboard(group_field_selection, conf)
             merged_list = summary_search_filter_options
             sorted_frame = dataframe.sort_values(by='Values', ascending=False).to_dict('records')

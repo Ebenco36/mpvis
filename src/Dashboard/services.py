@@ -87,6 +87,8 @@ class PaginatedQuery(Query):
 db.session.query_class = PaginatedQuery
 
 def get_table_as_dataframe_exception(table_name, filter_column=None, filter_value=None, page=1, per_page=10):
+    page = int(page)
+    per_page = int(per_page)
     # Reflect the table using SQLAlchemy
     table = db.Table(table_name, db.metadata, autoload_with=db.engine)
 

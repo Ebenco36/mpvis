@@ -3,20 +3,20 @@ import altair as alt
 import pandas as pd
 from pathlib import Path
 import json
-from src.implementation.visualization import DataImport
+from src.services.visualization import DataImport
 from flask import jsonify, request
-from src.implementation.graphs.helpers import Graph
+from src.services.graphs.helpers import Graph
 from sklearn.model_selection import train_test_split
-from src.implementation.Helpers.helper import removeUnderscoreIDFromList
-from src.implementation.Helpers.Regressors.index import Regressors
-from src.implementation.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
-from src.implementation.data.columns.remove_columns import not_needed_columns
-from src.implementation.Helpers.machine_learning_al.normalization import Normalization
-from src.implementation.Helpers.machine_learning_al.UnsupervisedMachineLearning import MachineLearning
-from src.implementation.Helpers.helper import create_json_response
-from src.implementation.exceptions.AxisExceptions import AxisException
-from src.implementation.Helpers.helper import tableHeader
-from src.implementation.Helpers.fields_helper import transform_data_view
+from src.services.Helpers.helper import removeUnderscoreIDFromList
+from src.services.Helpers.Regressors.index import Regressors
+from src.services.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
+from src.services.data.columns.remove_columns import not_needed_columns
+from src.services.Helpers.machine_learning_al.normalization import Normalization
+from src.services.Helpers.machine_learning_al.UnsupervisedMachineLearning import MachineLearning
+from src.services.Helpers.helper import create_json_response
+from src.services.exceptions.AxisExceptions import AxisException
+from src.services.Helpers.helper import tableHeader
+from src.services.Helpers.fields_helper import transform_data_view
 from flask_restful import Resource, reqparse
 
 class UOT(Resource):
@@ -49,7 +49,7 @@ class UOT(Resource):
         elif(page == "stage6"):
             return self.get_train_and_test_headers(path)
         elif(page == "stage7"):
-            return self.ML_explainability_implementation(path)
+            return self.ML_explainability_services(path)
 
 
     def post(self):
@@ -347,7 +347,7 @@ class UOT(Resource):
         )
 
 
-    def ML_explainability_implementation(self, path):
+    def ML_explainability_services(self, path):
         """
             Explain reason for the immediate above methods
         """

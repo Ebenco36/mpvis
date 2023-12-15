@@ -15,6 +15,9 @@ class DataResource(Resource):
     def get(self):
         # Access query parameters from the URL
         experimental_method = request.args.get('experimental_method', None)
+        page = request.args.get('page', 1)
+        per_page = request.args.get('per_page', 10)
+        print(page)
         # download format
         download = request.args.get('download', None)
         if(download):
@@ -29,7 +32,7 @@ class DataResource(Resource):
                 return send_file(filename, as_attachment=True)
         else:
             # page default
-            data = DataService.get_data_by_column_search("rcsentinfo_experimental_method", experimental_method)
+            data = DataService.get_data_by_column_search("rcsentinfo_experimental_method", experimental_method, page, per_page)
             if(data):
                 return ApiResponse.success(data, "Fetch records successfully.")
             else: 
