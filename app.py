@@ -9,7 +9,6 @@ from flask_admin import Admin
 from dotenv import load_dotenv
 from src import RouteInitialization
 from utils.errors import BadRequestException
-from blueprints.users import users_blueprint
 from logging.handlers import RotatingFileHandler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -27,9 +26,6 @@ def create_app():
     Mail(app)
     admin = Admin(app)
 
-
-    app.register_blueprint(users_blueprint, url_prefix='/api/v1')
-    
     # Configure logging to write to a file
     log_handler = RotatingFileHandler('error.log', maxBytes=1024 * 1024, backupCount=10)
     log_handler.setLevel(logging.ERROR)

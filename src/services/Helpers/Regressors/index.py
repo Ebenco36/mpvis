@@ -7,11 +7,13 @@ from sklearn.impute import SimpleImputer, KNNImputer
 
 class Regressors:
 
-    def __init__(self, data, remove_by_percent):
+    def __init__(self, data = [], remove_by_percent = 30):
         self.data = data
-        self.data, self.needed_columns, self.removed_columns = self.remove_empty_by_percent(float(remove_by_percent))
+        self.remove_by_percent = remove_by_percent
+       
 
     def run_regressor_algorithm(self, algorithm, **kwargs):
+        self.data, self.needed_columns, self.removed_columns = self.remove_empty_by_percent(float(self.remove_by_percent))
         regressor = algorithm(**kwargs)
         # Create a copy of the dataset to store the imputed values
         imputed_data = self.data.copy()
@@ -33,15 +35,9 @@ class Regressors:
         imputed_data_ = regressor.fit_transform(imputed_data)
         imputed_data_ = pd.DataFrame(imputed_data_, columns=self.data.columns)
 
-        response = create_json_response(
-            httpResponse=False, 
-            data=imputed_data_, 
-            status=True, 
-            status_code=200, 
-            message="fetch successfully", 
-            error_message=""
-        )
-        return response
+        
+        data = imputed_data_
+        return data
 
     # Random Forest
     def KNN_imputer_regressor(self):

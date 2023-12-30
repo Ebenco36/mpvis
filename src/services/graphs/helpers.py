@@ -15,7 +15,7 @@ class Graph:
         self.z = None # for multi dimension
         self.w = None # for multi dimension
         self.altair_obj = None
-        self.selection_avenue = "drag"
+        self.selection_avenue = "click"
         self.encoded_x = None
         self.encoded_y = None
 
@@ -29,6 +29,7 @@ class Graph:
         self.acceptable_encoding_tags = ["norminal", "temporal", "quantitative", "ordinal"]
         self.start_color = '#005EB8'  # Start Color
         self.end_color = '#B87200'    # End Color 
+        self.selection = None
 
 
     def set_properties(self, axis:list = [], labels:str = "", selection_avenue_default:list = [], selection_type_default:list = []):
@@ -138,7 +139,8 @@ class Graph:
         #     alt.Y(self.y).legend(None),
         #     alt.value('lightgray')
         # )
-        color = self.labels+':N' if (len(self.labels) > 0) else alt.Color(scale=alt.Scale(scheme='category20'))
+        color = alt.condition(self.selection, self.labels+':N', alt.value('lightgray'))
+
         # set tooltips
 
         tooltip_list = [alt.Tooltip(tooltip, title=format_string_caps(tooltip.capitalize())) for tooltip in tooltips]
@@ -194,20 +196,25 @@ class Graph:
         self.selection_avenue = selection_avenue
         return self
     
-    def add_selection(self, type:str = 'single'):
+    def set_selection(self, type:str = 'single', groups:list=[]):
+        """
         if(type not in self.selection_type_default):
             raise NotFoundOnList("selected option is not on the list")
-        
+        """
         if(type == 'single'):
-            selection = alt.selection_single(on=self.selection_avenue, name='MySelection')
+            self.selection = alt.selection_single(on=self.selection_avenue, name='MySelection', fields=groups)
         elif(type == 'multiple'):
-            selection = alt.selection_multi(on=self.selection_avenue, name='MySelection')
+            self.selection = alt.selection_multi(on=self.selection_avenue, name='MySelection', fields=groups)
         elif(type == 'interval'):
-            selection = alt.selection_interval(on=self.selection_avenue, name='MySelection')
+            self.selection = alt.selection_interval(on=self.selection_avenue, name='MySelection', fields=groups)
         else:
-            selection = alt.selection_single(on=self.selection_avenue, encodings=['x'], name='MySelection')
-
-        self.altair_obj = self.altair_obj.add_selection(selection)
+            self.selection = alt.selection_single(on=self.selection_avenue, name='MySelection', fields=groups)
+        
+        return self
+            
+    def add_selection(self):
+        
+        self.altair_obj = self.altair_obj.add_selection(self.selection)
 
         return self
     
@@ -268,13 +275,10 @@ class Graph:
         return self
     
     def legend_config(self):
-        # self.altair_obj = self.altair_obj.configure_legend(
-        #     strokeColor='gray',
-        #     fillColor='#EEEEEE',
-        #     padding=10,
-        #     cornerRadius=10,
-        #     orient='top-right'
-        # )
+        self.altair_obj = self.altair_obj.configure_legend(
+            orient='bottom',
+            titleLimit=0
+        )
         return self
     
 

@@ -113,11 +113,24 @@ def load_csv_data(model_class, csv_path):
         # Rename the column
         df = df.rename(columns={old_name: new_name})
 
-    # Insert records into the database
+    insert_or_update_records(df, model_class, db)
+
+
+def insert_or_update_records(df, model_class, db):
     for index, row in df.iterrows():
-        record = model_class(**row.to_dict())
-        db.session.add(record)
+        pdb_code = row['pdb_code']
+
+        # Check if the record with the given PDB code already exists
+        existing_record = model_class.query.filter_by(pdb_code=pdb_code).first()
+
+        if existing_record:
+            # If the record exists, update it
+            for key, value in row.to_dict().items():
+                setattr(existing_record, key, value)
+        else:
+            # If the record doesn't exist, insert a new record
+            new_record = model_class(**row.to_dict())
+            db.session.add(new_record)
 
     # Commit the changes
     db.session.commit()
-

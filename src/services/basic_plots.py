@@ -48,7 +48,7 @@ def home_page_graph(conf):
 
 
 def data_flow(protein_db):
-    d = pd.crosstab(df.bibliography_year, columns=df.Group).cumsum()
+    d = pd.crosstab(protein_db.bibliography_year, columns=protein_db.group).cumsum()
 
     d = d.stack().reset_index()
     d = d.rename(columns={0:'CummulativeCount'})
@@ -60,7 +60,7 @@ def data_flow(protein_db):
     color_list = ['#93C4F6', '#005EB8', '#D9DE84', '#636B05']
 
     # Generate a color palette with 10 colors
-    num_colors = len(list(df['Group'].unique()))
+    num_colors = len(list(protein_db['group'].unique()))
     palette = generate_color_palette(start_color, end_color, num_colors)
     random.shuffle(palette)
 
@@ -69,9 +69,9 @@ def data_flow(protein_db):
     entries_over_time = alt.Chart(d).mark_bar(size=15).encode(
         x=alt.X('bibliography_year:O', title="Year"),
         y=alt.Y('CummulativeCount:Q', title = 'Entries'),
-        color=alt.Color('Group', scale=custom_palette, legend=alt.Legend(title="DB Type", labelLimit=0)),
+        color=alt.Color('group', scale=custom_palette, legend=alt.Legend(title="DB Type", labelLimit=0)),
         tooltip=[alt.Tooltip('CummulativeCount:Q'),
-                alt.Tooltip('Group'),
+                alt.Tooltip('group'),
                 alt.Tooltip('bibliography_year:O')]
     ).configure_legend(orient='bottom').properties(
         width="container",
@@ -79,6 +79,19 @@ def data_flow(protein_db):
         title="Database Entries Over Time"
     ).to_dict()
     return entries_over_time
+
+def group_data_by_methods(df, columns=['bibliography_year', 'rcsentinfo_experimental_method'], col_color="rcsentinfo_experimental_method", col_x="bibliography_year"):
+    group_subtype_count = df.groupby(columns).size().reset_index(name='Count')
+    chart = alt.Chart(group_subtype_count).mark_line().encode(
+        x=f'{col_x}:O',
+        y='Count:Q',
+        color=f'{col_color}:N',
+        tooltip=['Count:Q']
+    ).configure_legend(orient='bottom').properties(
+        width="container",
+        title='Counts of Experimental Methods Over the Years'
+    ).to_dict()
+    return chart
 
 def create_UI_grouped_by():
     group_by = GroupBy(df)

@@ -4,7 +4,7 @@ import pandas as pd
 
 class Normalization:
 
-    def __init__(self, data_frame):
+    def __init__(self, data_frame = []):
         self.data_frame = data_frame
 
     def select_option(self):

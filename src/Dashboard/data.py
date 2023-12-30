@@ -125,7 +125,7 @@ def stats_data(for_processing=True):
 
 
 def array_string_type ():
-    array_list = ['rcsb_entry_info_software_programs_combined', ]
+    array_list = ['rcsentinfo_software_programs_combined', ]
 
     return array_list
 
@@ -135,3 +135,10 @@ def reduce_value_length(data):
         if 'value' in item:
             item['value'] = shorten_column_name(item['value'])
     return data
+
+
+def reduce_value_length_version2(data):
+    res = []
+    for item in data: 
+        res.append(shorten_column_name(item))
+    return res

@@ -1,10 +1,14 @@
 import numpy as np
-from src.services.Helpers.helper import extract_function_names, replace_and_separate, \
+from src.services.Helpers.helper import extract_function_names, get_class_functions, replace_and_separate, \
     filter_list, format_string_caps
 from src.services.data.columns.dates import dates_columns
 from src.services.data.columns.norminal import descriptors, all_descriptors
 from src.services.data.columns.quantitative.quantitative import cell_columns, rcsb_entries
 from src.services.data.columns.quantitative.quantitative_array import quantitative_array_column
+from src.services.Helpers.machine_learning_al.dimensionality_reduction import DimensionalityReduction
+from src.services.Helpers.machine_learning_al.normalization import Normalization
+from src.services.Helpers.machine_learning_al.UnsupervisedMachineLearning import MachineLearning
+from src.services.Helpers.Regressors.index import Regressors
 
 def graph_options(kit_id:int = 0):
     # default selections for graphs
@@ -36,8 +40,7 @@ def graph_combined_types_kit(kit_id:int=0):
 
 def machine_algorithms_helper_kit(kit_id:int=0):
     # ML algorithms
-    file_path_ml = 'src/services/Helpers/machine_learning_al/UnsupervisedMachineLearning.py'
-    ml_algorithms = filter_list(extract_function_names(file_path_ml), "_clustering")
+    ml_algorithms = filter_list(get_class_functions(MachineLearning()), "_clustering")
 
     ML_types = transform_data_view(ml_algorithms, 'Machine_learning_options', 'single')
 
@@ -46,8 +49,7 @@ def machine_algorithms_helper_kit(kit_id:int=0):
 
 def missing_algorithms_helper_kit(kit_id:int=0):
     # ML algorithms
-    file_path_missing = 'src\services\Helpers\Regressors\index.py'
-    missing_algorithms = filter_list(extract_function_names(file_path_missing), "_regressor")
+    missing_algorithms = filter_list(get_class_functions(Regressors()), "_regressor")
 
     Missing_types = transform_data_view(missing_algorithms, 'Data_augmentation_options', 'single', [], False)
 
@@ -65,8 +67,7 @@ def perc_of_missing_value_kit(kit_id:int = 0):
 
 def dimensionality_reduction_algorithms_helper_kit(kit_id:int=0):
     # DR algorithms
-    file_path_dr = 'src\services\Helpers\machine_learning_al\dimensionality_reduction.py'
-    dr_algorithms = filter_list(extract_function_names(file_path_dr), "_algorithm")
+    dr_algorithms = filter_list(get_class_functions(DimensionalityReduction()), "_algorithm")
     
     DR_types = transform_data_view(dr_algorithms, 'Dimensionality_reduction_options', 'single', [], False)
 
@@ -75,8 +76,7 @@ def dimensionality_reduction_algorithms_helper_kit(kit_id:int=0):
 
 def normalization_algorithms_helper_kit(kit_id:int=0):
     # Normalization algorithms
-    file_path_normal = 'src\services\Helpers\machine_learning_al\/normalization.py'
-    normal_algorithms = filter_list(extract_function_names(file_path_normal), "_normalization")
+    normal_algorithms = filter_list(get_class_functions(Normalization()), "_normalization")
 
     normal_types = transform_data_view(normal_algorithms, 'Normalization_options', 'single', [], False)
 

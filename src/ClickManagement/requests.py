@@ -5,7 +5,7 @@ class UserClickRequest:
     @staticmethod
     def get_parser():
         parser = reqparse.RequestParser()
-        parser.add_argument('element_id', type=str, required=True, help='Element id is required')
+        parser.add_argument('event', type=str, required=True, help='event is required')
         return parser
 
     @staticmethod

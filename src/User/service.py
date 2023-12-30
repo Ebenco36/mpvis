@@ -36,7 +36,6 @@ def create_user(request, input_data):
     # Check if username or email already exists
     check_username_exist = UserModel.query.filter_by(username=input_data.get("username")).first()
     check_email_exist = UserModel.query.filter_by(email=input_data.get("email")).first()
-    print(check_email_exist)
     if check_username_exist:
         return generate_response(message="Username already exists", status=HTTPStatus.BAD_REQUEST)
     elif check_email_exist:
@@ -71,7 +70,7 @@ def login_user(request, input_data):
         return generate_response(message=errors, status=HTTPStatus.BAD_REQUEST)
 
     email_or_username = input_data.get("email")
-    print("Where we are: "+email_or_username)
+    
     # Use 'filter' instead of 'filter_by' and 'or_' to create an OR condition
     get_user = UserModel.query.filter(
         (UserModel.email == email_or_username) | (UserModel.username == email_or_username)
@@ -88,13 +87,20 @@ def login_user(request, input_data):
                 "id": get_user.id,
                 "email": get_user.email,
                 "username": get_user.username,
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
             },
             current_app.config["SECRET_KEY"],
         )
-        input_data["token"] = token
+        response_data = {
+            "user": {
+                "email": get_user.email,
+                "username": get_user.username,
+                "name": get_user.name
+            },
+            "token": token
+        }
         return generate_response(
-            data=input_data, message="User login successfully", status=HTTPStatus.CREATED
+            data=response_data, message="User login successfully", status=HTTPStatus.CREATED
         )
     else:
         return generate_response(message="Password is wrong", status=HTTPStatus.BAD_REQUEST)
@@ -185,7 +191,7 @@ class UserService:
         return UserModel.query.get(user_id)
 
     @staticmethod
-    def update_user(user_id, name=None, phone=None, status=True, username=None, email=None, is_admin=False):
+    def update_user(user_id, name=None, phone=None, status=True, username=None, email=None, is_admin=False, has_taken_tour=False):
         user = UserModel.query.filter_by(id=user_id).first()
         if(username):
             user.username = username
@@ -199,6 +205,9 @@ class UserService:
             user.phone = phone
         if(status):
             user.status = status
+        if(has_taken_tour):
+            user.has_taken_tour = has_taken_tour
+        
         db.session.commit()
 
     @staticmethod

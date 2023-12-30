@@ -8,12 +8,15 @@ class UserModel(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(80), nullable=False)
-    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
-    phone = db.Column(db.String(15))
+    username = db.Column(db.String(64), index=True, unique=True)
+    phone = db.Column(db.String(15), nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=True)
+    institute = db.Column(db.String(255), nullable=True)
+    location = db.Column(db.String(255), nullable=True)
     password = db.Column(db.String(255), nullable=False)
     status = db.Column(db.String(8), default=False, nullable=False)
     is_admin = db.Column(db.Boolean(), default=False, nullable=False)
+    has_taken_tour = db.Column(db.Boolean(), default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=True)
 

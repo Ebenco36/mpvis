@@ -1,10 +1,11 @@
-from src.Dashboard.view import Dashboard, SummaryStatistics, UseCases
+from src.Dashboard.view import Dashboard, SummaryStatistics, UseCases, MembraneProteinList
 from src.Filters.view import Filters, MissingFilterKit, allowMissingPerc, \
     dimensionalityReductionOptions, normalizationOptions, dataSplitPercOptions, \
     PCAComponentsOptions, MachineLearningOptions, GraphOptions, trainAndTestSplitOptions
 
 def routes(api):
     api.add_resource(Dashboard, '/dashboard')
+    api.add_resource(MembraneProteinList, '/data-list')
     api.add_resource(SummaryStatistics, '/get-summary-statistics')
     api.add_resource(Filters, '/filters')
     api.add_resource(MissingFilterKit, '/missing-filter-kit')

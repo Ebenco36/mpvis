@@ -1,3 +1,4 @@
+import inspect
 import pandas as pd
 import ast
 import os
@@ -17,7 +18,6 @@ def convert_to_type(string_array):
         if string_array and not pd.isna(string_array):
             # Convert string array to numeric array
             value = ast.literal_eval(string_array)
-            print(value)
         else:
             value = []
     except (Exception, ValueError, TypeError) as ex:
@@ -54,6 +54,10 @@ def extract_function_names(file_path):
         function_names.extend(matches_list)
     
     return function_names
+
+
+def get_class_functions(class_instance):
+    return [func for func, _ in inspect.getmembers(class_instance, inspect.ismethod)]
 
 
 # Function to decode HTML entities
@@ -361,7 +365,7 @@ def generate_list_with_difference(num_elements, difference):
 def convert_to_numeric_or_str(value):
     if(value and value != " "):
         try:
-            return int(value)
+            return float(value)
         except (ValueError, KeyError):
             try:
                 return float(value)

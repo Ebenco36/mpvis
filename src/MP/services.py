@@ -4,12 +4,12 @@ from src.Dashboard.services import get_table_as_dataframe, get_table_as_datafram
 
 class DataService:
     @staticmethod
-    def get_data_by_column_search(column_name="rcsentinfo_experimental_method", value="X-ray", page=1, per_page=10):
+    def get_data_by_column_search(column_name="rcsentinfo_experimental_method", value=None, page=1, per_page=10):
         data = get_table_as_dataframe_exception("membrane_proteins", column_name, value, page, per_page)
         return data
     
     @staticmethod
-    def get_data_by_column_search_download(column_name="rcsentinfo_experimental_method", value="X-ray"):
+    def get_data_by_column_search_download(column_name="rcsentinfo_experimental_method", value=None):
         data = get_table_as_dataframe_download("membrane_proteins", column_name, value)
         return data
     
@@ -29,7 +29,6 @@ class DataService:
         df = get_table_as_dataframe("membrane_proteins")
         # Retrieve unique values for each categorical column
         for column_name in unique_columns:
-            print(df[column_name].unique())
             unique_values[column_name] = df[column_name].unique()
 
         return unique_values

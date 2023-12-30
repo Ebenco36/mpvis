@@ -1,4 +1,4 @@
-from flask import abort
+from flask import abort, send_file
 import pandas as pd
 from sqlalchemy import func
 from database.db import db
@@ -6,7 +6,7 @@ from sqlalchemy import select, func, desc
 from sqlalchemy import text
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Query
-import matplotlib.pyplot as plt
+from sqlalchemy import or_
 from src.MP.model import MembraneProteinData
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -16,11 +16,53 @@ Base = declarative_base()
 def get_all_items():
     return MembraneProteinData.query
 
+
+# Function to apply search and filter
+def apply_search_and_filter(query, search_term):
+    if search_term:
+        # Perform case-insensitive search on 'name' and 'description' columns
+        query = query.filter(or_(
+            MembraneProteinData.name.ilike(f"%{search_term}%"),
+            MembraneProteinData.pdb_code.ilike(f"%{search_term}%")
+        ))
+    return query
+
+# Function to apply sorting
+def apply_sorting(query, sort_by, sort_order):
+    if sort_by:
+        # Sort by the specified column and order
+        column = getattr(MembraneProteinData, sort_by)
+        query = query.order_by(column.asc() if sort_order.lower() == 'asc' else column.desc())
+    return query
+
+
 def get_items(request):
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 10))
+    search_term = request.args.get('search_term', default='', type=str)
+    sort_by = request.args.get('sort_by', default='id', type=str)
+    sort_order = request.args.get('sort_order', default='asc', type=str)
+    download = request.args.get('download', default='none', type=str)
 
     items = get_all_items()
+    
+    # Apply search and filter
+    items = apply_search_and_filter(items, search_term)
+
+    # Apply sorting
+    items = apply_sorting(items, sort_by, sort_order)
+    
+    if (download in ["csv", "xlsx"]):
+        # Retrieve all records after applying the filter
+        filtered_records = items.all()
+
+        # Get column names dynamically
+        column_names = [desc for desc in items.statement.columns.keys()]
+        # Convert records to a DataFrame
+        records_df = pd.DataFrame([{col: getattr(record, col) for col in column_names} for record in filtered_records])
+        
+        return records_df
+        
 
     # Perform pagination using LIMIT and OFFSET
     paginated_items = items.paginate(page=page, per_page=per_page, error_out=False)

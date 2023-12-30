@@ -1,8 +1,9 @@
+import io
 from flask_restful import Resource, reqparse
-from src.Dashboard.services import get_items, get_table_as_dataframe
+from src.Dashboard.services import export_to_csv, export_to_excel, get_items, get_table_as_dataframe
 from src.services.pages import Pages
 import json
-from flask import jsonify, request
+from flask import jsonify, request, send_file, current_app
 from src.services.Helpers.helper import summaryStatisticsConverter
 from src.Dashboard.data import stats_data
 from src.services.graphs.helpers import Graph
@@ -15,7 +16,7 @@ from src.services.Helpers.machine_learning_al.normalization import Normalization
 from src.services.data.columns.norminal import descriptors
 from src.services.exceptions.AxisExceptions import AxisException
 from src.services.Helpers.helper import find_dict_with_value_in_nested_data
-from src.services.basic_plots import home_page_graph, data_flow
+from src.services.basic_plots import group_data_by_methods, home_page_graph, data_flow
 from src.services.Helpers.helper import tableHeader
 from src.middlewares.auth_middleware import token_required
 
@@ -36,6 +37,7 @@ class Dashboard(Resource):
         conf = json.loads(conf)
         # trend = home_page_graph(conf)
         trend = data_flow(table_df)
+        trend_by_method = group_data_by_methods(table_df)
         default_display = [
             "group", 'taxonomic_domain', 'citation_country'
         ]
@@ -65,8 +67,9 @@ class Dashboard(Resource):
         # group_graph = sorted(group_graph.values(), key=lambda obj: obj)
         result = {
             'data': data,
+            'trend': trend,
+            'trend_by_method': trend_by_method,
             'group_graph_array': group_graph_array,
-            'trend': trend
         }
 
         return jsonify(result)
@@ -77,7 +80,49 @@ class Dashboard(Resource):
             'success': True,
         }, 201
 
+class MembraneProteinList(Resource):
+    # @staticmethod
+    @token_required
+    def get(self):
+        
+        # Get the DataFrame directly
+        table_df = get_table_as_dataframe("membrane_proteins")
+        download = request.args.get('download', default='none', type=str)
+        data = get_items(request)
+        if(download in ["csv", "xlsx"]):
+            if(download == "csv"):
+                filename = 'output_data.csv'
+                # Convert DataFrame to CSV
+                csv_data = data.to_csv(index=False)
+                # Create a file-like buffer
+                buffer = io.StringIO()
+                # Write the CSV data to the buffer
+                buffer.write(csv_data)
+                # Set up response headers
+                response = current_app.make_response(buffer.getvalue())
+                response.headers['Content-Type'] = 'text/csv'
+                response.headers['Content-Disposition'] = 'attachment; filename=' + filename
 
+                return response
+            elif(download == "xlsx"):
+                filename = 'output_data.xlsx'
+                # Create a file-like buffer
+                buffer = io.BytesIO()
+                # Convert DataFrame to XLSX
+                data.to_excel(buffer, index=False)
+                # Set up response headers
+                response = current_app.make_response(buffer.getvalue())
+                response.headers['Content-Type'] = 'text/xlsx'
+                response.headers['Content-Disposition'] = 'attachment; filename=' + filename
+
+                return response
+        result = {
+            'data': data,
+        }
+
+        return jsonify(result)
+    
+    
 class SummaryStatistics(Resource):
     @token_required
     def get(self):

@@ -10,7 +10,7 @@ class ClickResource(Resource):
     @token_required
     def post(self):
         arg = UserClickRequest.parse_args()
-        element_id = arg['element_id']
+        element_id = arg['event']
         # Generate a session ID if not already present
         session_id = request.headers.get('X-Session-ID') or str(uuid.uuid4())
         current_user = g.current_user

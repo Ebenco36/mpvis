@@ -9,6 +9,7 @@ class Click(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     clicked_at = db.Column(db.DateTime, default=datetime.utcnow)
     element_id = db.Column(db.String(50))
+    data = db.Column(db.Text)
     page_url = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)

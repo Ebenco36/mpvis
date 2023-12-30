@@ -4,6 +4,7 @@ from database.db import db
 from flask_script import Manager
 from flask_migrate import Migrate
 from flask.cli import FlaskGroup
+from src.Commands.populateData import addDefaultAdmin, addFeedbackQuestions, addQuestion
 from src.Commands.migrateCommand import generate_model_class, load_csv_data
 from src.Commands.migrateCommandMPstruct import generate_model_class_MPSTRUCT, load_csv_data_MPSTRUCT
 from src.Commands.migrateCommandPDB import generate_model_class_PDB, load_csv_data_PDB
@@ -46,6 +47,20 @@ def init_migrate_mpstruct_upgrade():
     load_csv_data_MPSTRUCT(model_class_mpstruct, './datasets/Mpstruct_dataset.csv')
     load_csv_data_PDB(model_class_pdb, './datasets/PDB_data.csv')
     load_csv_data(model_class, './datasets/Quantitative_data.csv')
+
+
+@app.cli.command("sync-question-with-database")
+def init_data_questions():
+    addQuestion()
+    
+@app.cli.command("sync-system_admin-with-database")
+def init_system_admin():
+    addDefaultAdmin()
+    
+    
+@app.cli.command("sync-feedback-questions-with-database")
+def init_system_admin():
+    addFeedbackQuestions()
     
 if __name__ == '__main__':
     manager.run()

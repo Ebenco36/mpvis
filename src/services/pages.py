@@ -34,7 +34,18 @@ class Pages:
     
     def dashboard_helper_exemption(self, group_by_column = 'resolution', range_name="range_value", range_resolution_meters=0.2):
         
+        # check if column has * . Separate based on *
+        field_filter = ""
+        if("*" in group_by_column):
+            # Field filter is the value we are looking for within a column
+            # This is specific to rcsb_entry_info_selected_polymer_entity_types
+            data_split = group_by_column.split("*")
+            group_by_column = data_split[0]
+            field_filter = data_split[1]
         group_by_column = shorten_column_name(group_by_column)
+        
+        if(field_filter != ""):
+            group_by_column = group_by_column+"*"+field_filter
         
         if ( not '*' in group_by_column and group_by_column != ""):
             # Apply the custom function to 'Column1'
@@ -52,14 +63,12 @@ class Pages:
                 # Convert 'selected column' column to numeric values in the numeric DataFrame
                 df_numeric[group_by_column] = pd.to_numeric(df_numeric[group_by_column], errors='coerce')
 
-                max_range_meters = round(max_value)
+                max_range_meters = float(max_value)
                 range_bins = generate_range_bins(range_resolution_meters, max_range_meters)
                 generated_list = generate_list_with_difference(len(range_bins), range_resolution_meters)
-
                 # Define custom bins for range grouping in the numeric DataFrame
                 bins = generated_list
                 labels = range_bins
-
                 # Create a new column 'range_name' based on the range of 'Species' values in the numeric DataFrame
                 df_numeric[range_name] = pd.cut(df_numeric[group_by_column], bins=bins, labels=labels[:-1], right=False)
 

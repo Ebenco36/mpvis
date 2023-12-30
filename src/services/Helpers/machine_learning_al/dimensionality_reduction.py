@@ -4,6 +4,7 @@ from sklearn.random_projection import GaussianRandomProjection
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.decomposition import PCA, FastICA, TruncatedSVD, NMF, FactorAnalysis
 from sklearn.manifold import TSNE
+import umap
 from sklearn.manifold import Isomap
 import pandas as pd
 import numpy as np
@@ -11,7 +12,7 @@ import json
 import altair as alt
 
 class DimensionalityReduction:
-    def __init__(self, X, n_features=2, pca_columns:list=[]):
+    def __init__(self, X = [], n_features=2, pca_columns:list=[]):
         self.X = X
         self.n_features = n_features if n_features > 1 else 2
         self.dr_columns = pca_columns
@@ -65,10 +66,8 @@ class DimensionalityReduction:
 
         return data, explainable
     
-    def tsne_algorithm(self):
-        # Reshape the scalar to a 2D array
-        # data_2d = np.array(self.X).reshape(-1, 1)
-        model = TSNE(n_components=self.n_features)
+    def tsne_algorithm(self, perplexity=30, n_iter=1000):
+        model = TSNE(n_components=self.n_features, perplexity=perplexity, n_iter=n_iter)
         model_data = model.fit_transform(self.X)
         data = pd.DataFrame(model_data, columns=self.dr_columns)
         explainable = self.explainable(model, self.X.columns)
@@ -83,6 +82,13 @@ class DimensionalityReduction:
 
         return data, explainable
     
+    def umap_algorithm(self, n_neighbors=15, min_dist=0.1):
+        model = umap.UMAP(n_components=2, n_neighbors=n_neighbors, min_dist=min_dist)
+        model_data = model.fit_transform(self.X)
+        data = pd.DataFrame(model_data, columns=self.dr_columns)
+        explainable = ''
+        
+        return data, explainable
 
     def pca_contribution(self, data, data_  , n_components):
         # Access the principal components

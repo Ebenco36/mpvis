@@ -123,7 +123,8 @@ class UserDetailResource(Resource):
             args['status'], 
             args['username'], 
             args['email'], 
-            args['is_admin']
+            args['is_admin'],
+            args['has_taken_tour']
         )
         return {'message': 'User updated successfully'}
 
