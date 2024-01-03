@@ -15,7 +15,7 @@ class ContactService:
         db.session.commit()
 
         # Notify admins via email
-        self.notify_admins(new_contact)
+        # self.notify_admins(new_contact)
 
     def get_contacts(self):
         contacts = Contact.query.all()

@@ -23,4 +23,4 @@ class ContactResource(Resource):
             return ApiResponse.error("Validation Error", 400, e.messages)
 
         self.contact_service.add_contact(data)
-        return ApiResponse.success([], "Contact added successfully", 201)
+        return ApiResponse.success([], "Thank you for getting in touch. We will certainly respond shortly.", 201)
