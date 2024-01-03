@@ -7,7 +7,13 @@ from flask_mail import Mail
 from flask_cors import CORS
 from flask_admin import Admin
 from dotenv import load_dotenv
-from src import RouteInitialization
+
+try:
+    from src.routes import RouteInitialization
+    is_route_ready = True
+except ImportError as e:
+    is_route_ready = False
+    
 from utils.errors import BadRequestException
 from logging.handlers import RotatingFileHandler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -19,13 +25,14 @@ load_dotenv()  # load env files
 
 def create_app():
     app = Flask(__name__)
+    # os.environ['REQUESTS_CA_BUNDLE'] = './ca-bundle.crt'
     app.config.from_object(os.getenv('APP_SETTINGS'))
     app.url_map.strict_slashes = False
     db.init_app(app)
     CORS(app)
     Mail(app)
     admin = Admin(app)
-
+    
     # Configure logging to write to a file
     log_handler = RotatingFileHandler('error.log', maxBytes=1024 * 1024, backupCount=10)
     log_handler.setLevel(logging.ERROR)
@@ -40,16 +47,15 @@ def create_app():
     """
         Route Implementation. Well structured
     """
-    init_route = RouteInitialization()
-    init_route.init_app(app)
+    if(is_route_ready):
+        init_route = RouteInitialization()
+        init_route.init_app(app)
     
     @app.route('/api/v1/protected_route')
     @token_required
     def protected_route():
         current_user = g.current_user
         return f'This route is protected. Current user: {current_user.username}'
-
-
 
     @app.errorhandler(BadRequestException)
     def bad_request_exception(e):

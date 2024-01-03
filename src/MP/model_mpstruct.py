@@ -18,3 +18,5 @@ class MPSTURCT(db.Model):
     secondary_bibliogrpahies = db.Column(db.String)
     related_pdb_entries = db.Column(db.String)
     member_proteins = db.Column(db.String)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -1,7 +1,18 @@
 from flask import Response
+from src.Feedbacks.serializers import FeedbackSchema
+from src.Training.serializers import UserResponseSerializer
+from src.User.service import (
+    create_user, 
+    reset_password_email_send, 
+    login_user, reset_password, 
+    current_user, logout_user, 
+    UserService
+)
 from flask_restful import Resource
 from flask import request, make_response
-from src.User.service import create_user, reset_password_email_send, login_user, reset_password, current_user, UserService
+from src.Feedbacks.models import Feedback
+from src.utils.response import ApiResponse
+from src.Training.models import UserResponse
 from src.middlewares.auth_middleware import token_required
 from src.User.requests import UserRequest, UserUpdateRequest
 
@@ -28,6 +39,12 @@ class LoginApi(Resource):
         response, status = login_user(request, input_data)
         return make_response(response, status)
 
+
+class LogoutApi(Resource):
+    @staticmethod
+    def get() -> Response:
+        response, status = logout_user(request)
+        return make_response(response, status)
 
 class ForgotPassword(Resource):
     @staticmethod
@@ -56,7 +73,7 @@ class CurrentUserResource(Resource):
     @token_required
     def get(self):
         response, status = current_user()
-        return make_response(response, status)
+        return ApiResponse.success(response, "User fetched successfully", status)
     
 
 
@@ -101,17 +118,21 @@ class UserDetailResource(Resource):
     def get(self, user_id):
         user = UserService.get_user_by_id(user_id)
         if user:
-            return {'user': {
+            user = {
                 'id': user.id, 
                 'name': user.name, 
                 'phone': user.phone, 
                 'email': user.email, 
                 'username': user.username, 
-                'is_admin': user.is_admin
-                }
+                'is_admin': user.is_admin,
+                'location': user.location, 
+                'institute': user.institute,
+                'has_taken_tour': user.has_taken_tour,
             }
+            
+            return ApiResponse.success(user, "User fetched successfully", 200)
         else:
-            return {'message': 'User not found'}, 404
+            return ApiResponse.error("User not found", 404, "User not found")
         
     @token_required
     def put(self, user_id):
@@ -126,9 +147,9 @@ class UserDetailResource(Resource):
             args['is_admin'],
             args['has_taken_tour']
         )
-        return {'message': 'User updated successfully'}
+        return ApiResponse.success([], "User updated successfully", 201)
 
     @token_required
     def delete(self, user_id):
         UserService.delete_user(user_id)
-        return {'message': 'User deleted successfully'}
+        return ApiResponse.success([], "User deleted successfully", 201)

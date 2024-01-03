@@ -8,7 +8,7 @@ class ApiResponse:
             'message': message,
             'data': data
         }
-        return jsonify(response, status_code)
+        return response, status_code
 
     @staticmethod
     def error(message='Error', status_code=400, errors=None):
@@ -17,4 +17,4 @@ class ApiResponse:
             'message': message,
             'errors': errors
         }
-        return jsonify(response, status_code)
+        return response, status_code

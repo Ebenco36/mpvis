@@ -1,6 +1,4 @@
-import os
 import re
-import click
 import pandas as pd
 import importlib
 from datetime import datetime
@@ -18,9 +16,9 @@ def create_instance(module_name, class_name):
             instance = class_
             return instance
         else:
-            raise AttributeError(f"Class '{class_name}' not found in module '{module_name}'.")
+            print(f"Class '{class_name}' not found in module '{module_name}'.")
     except ImportError:
-        raise ImportError(f"Module '{module_name}' not found.")
+        print(f"Module '{module_name}' not found.")
 
 
 def get_column_type(dtype):
@@ -49,20 +47,19 @@ def generate_model_class(csv_path, output_file='model.py'):
     df = pd.read_csv(csv_path, low_memory=False)
     df = processColumns(df)
     
-    
+    """NOT NEEDED
     module_name = "src.MP.model"
     class_name = "MembraneProteinData"
     instance = create_instance(module_name, class_name)
     if instance:
         return instance
+    """
     
 
     class MembraneProteinData(db.Model):
         __table_args__ = {'extend_existing': True}
         __tablename__ = 'membrane_proteins'
         id = db.Column(db.Integer, primary_key=True)
-        created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-        updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Add columns dynamically based on CSV headers and datatypes
     for column_name, dtype in zip(df.columns, df.dtypes):
@@ -82,10 +79,14 @@ def generate_model_class(csv_path, output_file='model.py'):
             column_type = get_column_type(dtype)
             shortened_name = shorten_column_name(column_name)
             file.write(f"    {shortened_name} = db.Column(db.{column_type.__name__})\n")
+            
+        file.write("    created_at = db.Column(db.DateTime, default=datetime.utcnow)\n")
+        file.write("    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)\n")
 
     print(f"Model class has been generated and saved to {output_file}")
     return MembraneProteinData
-
+    
+    
 def processColumns(df):
     # Remove columns that start with 'Unnamed: 0.1'
     columns_to_exclude = [col for col in df.columns if col.startswith('Unnamed')]

@@ -1,16 +1,14 @@
-import inspect
-import pandas as pd
-import ast
 import os
 import re
+import ast
 import html
 import json
 import math
+import inspect
 import numpy as np
-from bs4 import BeautifulSoup
+import pandas as pd
 from flask import jsonify
 import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 from src.services.data.columns.remove_columns import not_needed_columns
 
 def convert_to_type(string_array):
@@ -572,6 +570,3 @@ def get_class_names(file_path):
             class_names.append(node.name)
 
     return class_names
-
-
-

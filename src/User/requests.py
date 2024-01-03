@@ -35,6 +35,7 @@ class UserUpdateRequest:
         parser.add_argument('password', type=str, required=False, help='Password is required')
         parser.add_argument('status', type=bool, default=False)
         parser.add_argument('is_admin', type=bool, default=False)
+        parser.add_argument('has_taken_tour', type=bool, default=False)
         return parser
 
     @staticmethod

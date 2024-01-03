@@ -405,3 +405,35 @@ flask sync-system_admin-with-database
 gunicorn -w 4 server:app -p 5400
 
 gunicorn -w 4 -b 0.0.0.0:5400 server:app
+
+ gunicorn -w 4 -b 0.0.0.0:5400 --reload server:app
+
+
+
+
+ CRT GENERATION
+
+ ==========================
+1.
+bash
+Copy code
+
+brew install openssl
+
+2. Generate a Self-Signed Certificate:
+bash
+Copy code
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+This command generates a self-signed certificate (cert.pem) and its corresponding private key (key.pem). Follow the prompts to provide information such as the Common Name (CN), Organization, etc. For testing purposes, you can provide dummy information.
+
+3. Combine Certificate and Key into a PEM File:
+bash
+Copy code
+cat cert.pem key.pem > ca-bundle.pem
+This command combines the certificate and private key into a single PEM file (ca-bundle.pem). This file can be used as your CA bundle.
+
+4. Convert PEM to CRT (if needed):
+bash
+Copy code
+openssl x509 -outform der -in ca-bundle.pem -out ca-bundle.crt
+This command converts the PEM file to CRT format, which is commonly used for CA bundle files.

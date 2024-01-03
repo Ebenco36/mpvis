@@ -4,9 +4,14 @@ import datetime
 from os import environ
 from database.db import db
 from sqlalchemy import or_
-from flask import g, jsonify
+from flask import g, jsonify, make_response
+from src.Feedbacks.serializers import FeedbackSchema
+from src.Training.serializers import QuestionSchema, UserResponseSerializer
 from src.User.helper import send_forgot_password_email
 from src.User.model import UserModel
+from sqlalchemy.orm import class_mapper
+from src.Feedbacks.models import Feedback
+from src.Training.models import Question, UserResponse
 from src.middlewares.auth_middleware import token_required
 from src.utils.common import generate_response, TokenGenerator
 from src.User.validation import (
@@ -29,7 +34,7 @@ def create_user(request, input_data):
     # Validate input_data using a schema (replace 'YourValidationSchema' with the actual schema class)
     create_validation_schema = CreateSignupInputSchema()
     errors = create_validation_schema.validate(input_data)
-    print(errors)
+    
     if errors:
         return generate_response(message=errors, status=HTTPStatus.BAD_REQUEST)
 
@@ -155,13 +160,77 @@ def reset_password(request, input_data, token):
     )
 
 
+
+def logout_user(request):
+    """
+    Logs out the user by revoking the JWT token
+    :param request: The request object
+    :return: A dictionary with the keys: message, status
+    """
+    # Ensure the user is authenticated with a valid token
+    token = request.headers.get("Authorization")
+    token = token.replace("Bearer ", "")
+    
+    if not token:
+        return generate_response(message="Missing token", status=HTTPStatus.UNAUTHORIZED)
+
+    try:
+        decoded_token = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        return generate_response(message="Token has expired", status=HTTPStatus.UNAUTHORIZED)
+    except jwt.InvalidTokenError as e:
+        print(str(e))
+        return generate_response(message="Invalid token", status=HTTPStatus.UNAUTHORIZED)
+
+    # Log the user out by revoking the JWT token
+    # Note: You may want to implement a token blacklist mechanism for better security
+
+    current_app.logger.info(f"User {decoded_token['id']} logged out successfully")
+
+    # Create a response with unset cookies (assuming you are using cookies for JWT)
+    response = make_response()
+    response.delete_cookie("access_token")
+
+    return generate_response(message="User logged out successfully", status=HTTPStatus.OK)
+
 def current_user():
     if g.current_user:
+        user_responses = UserResponse.query.filter_by(user_id=g.current_user.id).all()
+
+        # Fetch associated questions based on question_id values
+        question_ids = [user_response.question_id for user_response in user_responses]
+        questions = Question.query.filter(Question.id.in_(question_ids)).all()
+
+        # Create a dictionary to map question_id to the corresponding Question instance
+        question_dict = {question.id: question for question in questions}
+
+        # Serialize UserResponses with nested question information
+        user_response_schema = UserResponseSerializer(many=True)
+
+        # Manually include question information in the serialized data
+        serialized_data = user_response_schema.dump(user_responses)
+        
+        for user_response in serialized_data:
+            question_id = user_response.get('question_id')
+            if question_id is not None:
+                user_response['question'] = QuestionSchema().dump(question_dict.get(question_id))
+
+
+        user_feedbacks = Feedback.query.filter_by(user_id=g.current_user.id).all()
+        user_feedbacks_schema = FeedbackSchema(many=True)
+        feedback_dicts = user_feedbacks_schema.dump(user_feedbacks)
+        
         return {
+            "id": g.current_user.id,
             "name": g.current_user.name,
-            "email": g.current_user.email,
-            "username": g.current_user.username,
             "phone": g.current_user.phone,
+            "email": g.current_user.email,
+            'user_responses': serialized_data,
+            'user_feedbacks': feedback_dicts,
+            "username": g.current_user.username,
+            'location': g.current_user.location, 
+            'institute': g.current_user.institute,
+            "has_taken_tour": g.current_user.has_taken_tour
         }, 200
     else:
         return {'message': 'Unauthorized'}, 401
@@ -172,13 +241,15 @@ class UserService:
         return UserModel.query.all()
 
     @staticmethod
-    def create_user(name, phone, username, email, password, status=True, is_admin=False):
+    def create_user(name, phone, username, email, password, status=True, is_admin=False, location="Berlin", institute="RKI"):
         new_user = UserModel(
             name = name,
             email = email,
             phone = phone,
+            location=location,
             username = username, 
-            is_admin = is_admin
+            is_admin = is_admin,
+            institute=institute
         )
         if(password):
             new_user.password = generate_password_hash(password, method='sha256')
@@ -191,7 +262,7 @@ class UserService:
         return UserModel.query.get(user_id)
 
     @staticmethod
-    def update_user(user_id, name=None, phone=None, status=True, username=None, email=None, is_admin=False, has_taken_tour=False):
+    def update_user(user_id, name=None, phone=None, status=True, username=None, email=None, is_admin=False, has_taken_tour=False, location=None, institute=None):
         user = UserModel.query.filter_by(id=user_id).first()
         if(username):
             user.username = username
@@ -205,6 +276,10 @@ class UserService:
             user.phone = phone
         if(status):
             user.status = status
+        if(location):
+            user.location = location
+        if(institute):
+            user.institute = institute
         if(has_taken_tour):
             user.has_taken_tour = has_taken_tour
         

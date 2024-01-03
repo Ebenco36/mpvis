@@ -3,6 +3,7 @@ from marshmallow import Schema, fields, validates, ValidationError
 from src.Training.models import Category
 from flask_marshmallow import Marshmallow
 from flask import Flask, current_app
+from datetime import datetime
 
 app = Flask(__name__)
 with app.app_context():
@@ -46,3 +47,15 @@ class CategorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Category
      
+     
+     
+class UserResponseSerializer(Schema):
+    id = fields.Integer(dump_only=True)
+    session_id = fields.String(required=True)
+    user_id = fields.Integer(required=True)
+    question_id = fields.Integer(required=True)
+    answer_id = fields.Integer(required=True)
+    is_correct = fields.Boolean(required=True, default=False)
+    created_at = fields.DateTime(dump_only=True, default=datetime.utcnow)
+    updated_at = fields.DateTime(dump_only=True, default=datetime.utcnow)
+    

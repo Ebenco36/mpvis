@@ -56,6 +56,29 @@ class UnsupervisedPipeline:
         self.data_frame = subset_result_df
         # Save the subset DataFrame to a CSV file
         return self
+    
+    def modify_dataframe(self, excluded_fields:list=[]):
+        for field in excluded_fields:
+            if field == "reflns":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('reflns')]
+            if field == "refine":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('refine')]
+            if field == "rcsb_":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('rcsb_')]
+            if field == "diffrn":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('diffrn')]
+            if field == "exptl":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('exptl')]
+            if field == "cell_":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('cell_')]
+            if field == "group_":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('group_')]
+            if field == "subgroup_":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('subgroup_')]
+            if field == "species_":
+                self.data_frame = self.data_frame.loc[:, ~self.data_frame.columns.str.startswith('species_')]
+            
+        return self
 
     def select_numeric_columns(self):
         self.numeric_data = self.data_frame.select_dtypes(include=['float', 'int', 'float64', 'int64'])

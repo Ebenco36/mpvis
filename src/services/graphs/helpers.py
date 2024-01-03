@@ -202,19 +202,19 @@ class Graph:
             raise NotFoundOnList("selected option is not on the list")
         """
         if(type == 'single'):
-            self.selection = alt.selection_single(on=self.selection_avenue, name='MySelection', fields=groups)
+            self.selection = alt.selection_point(on=self.selection_avenue, name='MySelection', fields=groups)
         elif(type == 'multiple'):
             self.selection = alt.selection_multi(on=self.selection_avenue, name='MySelection', fields=groups)
         elif(type == 'interval'):
             self.selection = alt.selection_interval(on=self.selection_avenue, name='MySelection', fields=groups)
         else:
-            self.selection = alt.selection_single(on=self.selection_avenue, name='MySelection', fields=groups)
+            self.selection = alt.selection_point(on=self.selection_avenue, name='MySelection', fields=groups)
         
         return self
             
     def add_selection(self):
         
-        self.altair_obj = self.altair_obj.add_selection(self.selection)
+        self.altair_obj = self.altair_obj.add_params(self.selection)
 
         return self
     

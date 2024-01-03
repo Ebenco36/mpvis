@@ -12,6 +12,13 @@ from src.Commands.migrateCommandPDB import generate_model_class_PDB, load_csv_da
 migrate = Migrate(app, db)
 manager = Manager(app)
 
+def delete_file(file_path):
+    try:
+        os.remove(file_path)
+        print(f"File '{file_path}' deleted successfully.")
+    except OSError as e:
+        print(f"Error deleting file '{file_path}': {e}")
+    
 @app.cli.command("sync-protein-database")
 def init_migrate_mpstruct_upgrade():
     
@@ -22,9 +29,12 @@ def init_migrate_mpstruct_upgrade():
         with app.app_context():
             click.echo("Running 'Initialize Database Migrations'")
             os.system('flask db init')
-    # Example usage:
+    
+    delete_file("src/MP/model_mpstruct.py")
     model_class_mpstruct = generate_model_class_MPSTRUCT('./datasets/Mpstruct_dataset.csv', 'src/MP/model_mpstruct.py')
+    delete_file("src/MP/model_pdb.py")
     model_class_pdb = generate_model_class_PDB('./datasets/PDB_data.csv', 'src/MP/model_pdb.py')
+    delete_file("src/MP/model.py")
     model_class = generate_model_class('./datasets/Quantitative_data.csv', 'src/MP/model.py')
 
     """Initialize, migrate, and upgrade the database."""
@@ -48,7 +58,6 @@ def init_migrate_mpstruct_upgrade():
     load_csv_data_PDB(model_class_pdb, './datasets/PDB_data.csv')
     load_csv_data(model_class, './datasets/Quantitative_data.csv')
 
-
 @app.cli.command("sync-question-with-database")
 def init_data_questions():
     addQuestion()
@@ -56,8 +65,7 @@ def init_data_questions():
 @app.cli.command("sync-system_admin-with-database")
 def init_system_admin():
     addDefaultAdmin()
-    
-    
+      
 @app.cli.command("sync-feedback-questions-with-database")
 def init_system_admin():
     addFeedbackQuestions()

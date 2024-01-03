@@ -64,14 +64,17 @@ class DataFilterResource(Resource):
         machine_list = machine_algorithms_helper_kit()
         regressors_list = missing_algorithms_helper_kit()
         categorical_column_list = transform_data_view(cat_list, 'categorical_columns', 'single', [], False)
-        methods = ["EM", "Multiple methods", "NMR", "X-ray"]
+        methods = ["All", "EM", "Multiple methods", "NMR", "X-ray"]
         experimental_method = transform_data_view(methods, 'methods_list', 'single', [], False)
+        excluded_fields = ["reflns", "refine", "rcsb_", "diffrn", "exptl", "cell_", "group_", "subgroup_", "species_"]
+        excluded_list = transform_data_view(excluded_fields, 'methods_list', 'multiple', [], False)
         filter_list = {
             "experimental_method_list": experimental_method,
             "categorical_list": categorical_column_list,
             "dimensionality_list": dimensionality_list,
             "normalization_list": normalization_list,
             "regressors_list": regressors_list,
+            "excluded_list": excluded_list,
             "machine_list": machine_list
         }
         return ApiResponse.success(filter_list, "Fetch filter list successfully.")
@@ -86,6 +89,7 @@ class UsupervisedResource(Resource):
             normalization_list = data.get('normalization_list', "min_max_normalization")
             dimensionality_list = data.get('dimensionality_list', "pca_algorithm")
             experimental_method = data.get('experimental_method_list', "X-ray")
+            excluded_fields = data.get('excluded_list', [])
             color_by = data.get('categorical_list', "species")
         else:
             machine_list = "kMeans_clustering"
@@ -93,20 +97,15 @@ class UsupervisedResource(Resource):
             normalization_list = "min_max_normalization"
             dimensionality_list = "pca_algorithm"
             experimental_method = "X-ray"
+            excluded_fields = []
             color_by = "species"
+        
+        experimental_method = None if experimental_method == "All" else experimental_method
+        
         
         """
             We are adding this to the filter. Either to use categorical data or not.
             
-            X = X.loc[:, ~X.columns.str.startswith('reflns')]
-            X = X.loc[:, ~X.columns.str.startswith('refine')]
-            #X = X.loc[:, ~X.columns.str.startswith('rcsb_')]
-            X = X.loc[:, ~X.columns.str.startswith('diffrn')]
-            #X = X.loc[:, ~X.columns.str.startswith('exptl')]
-            #X = X.loc[:, ~X.columns.str.startswith('cell_')]
-            #X = X.loc[:, ~X.columns.str.startswith('Group_')]
-            #X = X.loc[:, ~X.columns.str.startswith('Subgroup_')]
-            X = X.loc[:, ~X.columns.str.startswith('Species_')]
         """
         # dimensionality reduction columns
         get_column_tag = dimensionality_list.upper().split("_")[0]
@@ -117,6 +116,7 @@ class UsupervisedResource(Resource):
         result = (
             UnsupervisedPipeline(data_frame)
                 .dataPrePreprocessing()
+                .modify_dataframe(excluded_fields)
                 .select_numeric_columns()
                 .apply_imputation(imputation_method=regressors_list, remove_by_percent=90)
                 .apply_normalization(normalization_method=normalization_list)
