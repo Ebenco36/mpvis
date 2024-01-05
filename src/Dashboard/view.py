@@ -1,6 +1,6 @@
 import io
 from flask_restful import Resource, reqparse
-from src.Dashboard.services import export_to_csv, export_to_excel, get_items, get_table_as_dataframe
+from src.Dashboard.services import export_to_csv, export_to_excel, get_items, get_table_as_dataframe, getMPstructDB, getPDBDB, preprocessVariables
 from src.services.pages import Pages
 import json
 from flask import jsonify, request, send_file, current_app
@@ -19,6 +19,7 @@ from src.services.Helpers.helper import find_dict_with_value_in_nested_data
 from src.services.basic_plots import group_data_by_methods, home_page_graph, data_flow
 from src.services.Helpers.helper import tableHeader
 from src.middlewares.auth_middleware import token_required
+from src.utils.response import ApiResponse
 
 class Dashboard(Resource):
     def __init__(self):
@@ -31,6 +32,7 @@ class Dashboard(Resource):
         # Get the DataFrame directly
         table_df = get_table_as_dataframe("membrane_proteins")
         pages = Pages(table_df)
+        
         data = get_items(request)
         
         conf = request.args.get('chart_conf', '{"color": "#005EB8", "opacity": 0.9}')
@@ -121,8 +123,7 @@ class MembraneProteinList(Resource):
         }
 
         return jsonify(result)
-    
-    
+      
 class SummaryStatistics(Resource):
     @token_required
     def get(self):
@@ -145,7 +146,7 @@ class SummaryStatistics(Resource):
             merged_list = summary_search_filter_options
             sorted_frame = dataframe.sort_values(by='Values', ascending=False).to_dict('records')
             data = {
-                "group_dict"    : group_dict,\
+                "group_dict"    : group_dict,
                 "search_object" : merged_list,
                 "data"          : group_graph,
                 "headers"       : tableHeader(dataframe.columns),
@@ -154,7 +155,6 @@ class SummaryStatistics(Resource):
                 "status"        : 'success',
             }
         return jsonify(data)
-
 
 class SummaryStatisticsLines(Resource):
 
@@ -244,3 +244,35 @@ class UseCases(Resource):
         ]
 
         return jsonify(cases)
+
+
+class AttributeVisualization(Resource):
+    def get(self):
+        column_PDB = preprocessVariables(getPDBDB())
+        column_MPstruct = preprocessVariables(getMPstructDB())
+        common_attributes = set(column_PDB) & set(column_MPstruct)
+        common_attributes.discard('Id')
+        common_columns = preprocessVariables(list(common_attributes))
+        
+        data = [
+            {
+                "name": "PDB",
+                "columns": column_PDB,
+                "column_count": len(column_PDB),
+                "route": "/attribute-pdb"
+            },
+            {
+                "name": "MPstruct",
+                "columns": column_MPstruct,
+                "column_count": len(column_MPstruct),
+                "route": "/attribute-mpstruct"
+            },
+            {
+                "name": "MPstruct, PDB",
+                "columns": common_columns,
+                "column_count": len(common_columns),
+                "route": "/attributes-mpstruct-pdb"
+            }
+        ]
+        
+        return ApiResponse.success(data, "Fetched variables successfully", 200)

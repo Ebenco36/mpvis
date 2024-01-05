@@ -443,7 +443,6 @@ def summaryStatisticsConverter(search_key):
 
     # Check if the name exists directly in the values
     for entry in data:
-        print(search_key +"=="+ entry['value'])
         if search_key == entry['value']:
             content_value = entry['value']
             found_key = content_value

@@ -179,7 +179,6 @@ def logout_user(request):
     except jwt.ExpiredSignatureError:
         return generate_response(message="Token has expired", status=HTTPStatus.UNAUTHORIZED)
     except jwt.InvalidTokenError as e:
-        print(str(e))
         return generate_response(message="Invalid token", status=HTTPStatus.UNAUTHORIZED)
 
     # Log the user out by revoking the JWT token

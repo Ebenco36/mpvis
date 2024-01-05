@@ -186,3 +186,31 @@ def export_to_csv(df, csv_filename):
 
 def export_to_excel(df, excel_filename):
     df.to_excel(excel_filename, index=False)
+    
+    
+def getMPstructDB():
+    table_df_MPstruct = get_table_as_dataframe("membrane_protein_mpstruct")
+    return table_df_MPstruct.columns.tolist()
+    
+    
+def getPDBDB():
+    table_df_DB = get_table_as_dataframe("membrane_protein_pdb")
+    return table_df_DB.columns.tolist()
+
+
+def preprocessVariables(variables:list=[]):
+    formatted_strings = []
+
+    for string in variables:
+        # Split the string by underscores
+        words = string.split('_')
+
+        # Remove the first word if the number of words is greater than 4
+        if len(words) > 4:
+            words = words[1:]
+
+        # Capitalize each remaining word and join them back into a string
+        formatted_string = ' '.join(word.capitalize() for word in words)
+        formatted_strings.append(formatted_string)
+
+    return formatted_strings
